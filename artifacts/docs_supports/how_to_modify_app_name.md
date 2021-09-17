@@ -11,8 +11,6 @@
 </resources>
 ```
 
-
-
 ## iOS
 
 1. xCode에서 General > Identity > Display Name 수정
