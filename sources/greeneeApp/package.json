@@ -17,11 +17,13 @@
     "react-native-background-fetch": "^4.0.3",
     "react-native-background-geolocation": "^4.2.2",
     "react-native-safe-area-context": "^3.3.2",
-    "react-native-screens": "^3.7.0"
+    "react-native-screens": "^3.7.0",
+    "react-native-splash-screen": "^3.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.15.5",
     "@babel/runtime": "^7.15.4",
+    "@bam.tech/react-native-make": "^3.0.3",
     "@react-native-community/eslint-config": "^3.0.1",
     "babel-jest": "^27.1.1",
     "eslint": "^7.32.0",
