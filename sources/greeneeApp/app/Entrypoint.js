@@ -3,17 +3,17 @@ import { SafeAreaView, StatusBar } from 'react-native';
 import SplashScreen from 'react-native-splash-screen';
 
 import Navigator from './navigations/';
+import { COLOR } from './config/styles';
+
 const App = () => {
   useEffect(() => {
     setTimeout(() => {
       SplashScreen.hide();
     }, 1000);
-    console.log('useEffect');
   }, [])
-  console.log('Entrypoint');
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <StatusBar />
+      <StatusBar backgroundColor={COLOR.MAIN}/>
       <Navigator />
     </SafeAreaView>
   );
