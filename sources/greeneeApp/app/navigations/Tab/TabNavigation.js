@@ -14,8 +14,8 @@ import { COLOR } from '../../config/styles';
 const Tab = createBottomTabNavigator();
 
 const TabNavigation = () => {
+
   return (
-    <NavigationContainer>
       <Tab.Navigator
         initialRouteName="홈"
         screenOptions={
@@ -26,6 +26,7 @@ const TabNavigation = () => {
             tabBarActiveBackgroundColor: COLOR.MAIN,
             tabBarInactiveTintColor: COLOR.MAIN_BLUR,
             tabBarInactiveBackgroundColor: COLOR.MAIN,
+            tabBarHideOnKeyboard: true,
           }
         }
       >
@@ -76,7 +77,6 @@ const TabNavigation = () => {
           component={ProfileScreen} />
 
       </Tab.Navigator>
-    </NavigationContainer>
   );
 }
 

@@ -1,9 +1,12 @@
 import React from 'react';
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 
 const HomeScreen = () => {
   return (
-    <Text> HomeScreen </Text>
+    <View>
+      <Text> HomeScreen </Text>
+    </View>
+
   )
 }
 

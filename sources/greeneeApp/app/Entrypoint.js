@@ -9,11 +9,12 @@ const App = () => {
   useEffect(() => {
     setTimeout(() => {
       SplashScreen.hide();
-    }, 1000);
-  }, [])
+    }, 2000);
+  }, []);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <StatusBar backgroundColor={COLOR.MAIN}/>
+      <StatusBar backgroundColor={COLOR.MAIN} />
       <Navigator />
     </SafeAreaView>
   );
