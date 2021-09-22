@@ -1,13 +1,11 @@
 import React from 'react';
-import { Text } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-import HomeScreen from '../../screens/HomeScreen';
+import MissionTab from '../../screens/MissionTab';
 import RecordScreen from '../../screens/RecordScreen';
-import MissionScreen from '../../screens/MissionScreen';
-import CommunityScreen from '../../screens/CommunityScreen';
+import HomeScreen from '../../screens/HomeScreen';
+import CommunityTab from '../../screens/CommunityTab';
 import ProfileScreen from '../../screens/ProfileScreen';
 
 import { COLOR } from '../../config/styles';
@@ -50,7 +48,7 @@ const TabNavigation = () => {
               fontSize: 10,
             }
           }}
-          component={MissionScreen} />
+          component={MissionTab} />
         <Tab.Screen
           name="홈"
           options={{
@@ -66,7 +64,7 @@ const TabNavigation = () => {
               <Icon name="earth-outline" color={color} size={size} />
             ),
           }}
-          component={CommunityScreen} />
+          component={CommunityTab} />
         <Tab.Screen
           name="프로필"
           options={{
