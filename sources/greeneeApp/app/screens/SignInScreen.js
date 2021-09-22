@@ -51,19 +51,20 @@ const SignInScreen = ({ navigation }) => {
 
   // 로그인버튼 눌렀을 때
   const signIn = async () => {
-    try {
-      // let response = await axios.post('',userInfo);
-      let storedUserInfo = await AsyncStorage.getItem('userInfo');
-      if(storedUserInfoJSON === null ) return;
-      let storedUserInfoJSON = JSON.parse(storedUserInfo);
-      if (userInfo.id === storedUserInfoJSON.id && userInfo.pwd === storedUserInfoJSON.pwd) {
-        const loginHandler = setLoginToken(true);
-      } else {
-        Alert.alert('에러', '아이디 혹은 비밀번호가 일치하지 않습니다.')
-      }
-    } catch (error) {
-      console.log('[signInError] : ', error);
-    }
+    // try {
+    //   // let response = await axios.post('',userInfo);
+    //   let storedUserInfo = await AsyncStorage.getItem('userInfo');
+    //   if(storedUserInfoJSON === null ) return;
+    //   let storedUserInfoJSON = JSON.parse(storedUserInfo);
+    //   if (userInfo.id === storedUserInfoJSON.id && userInfo.pwd === storedUserInfoJSON.pwd) {
+    //     const loginHandler = setLoginToken(true);
+    //   } else {
+    //     Alert.alert('에러', '아이디 혹은 비밀번호가 일치하지 않습니다.')
+    //   }
+    // } catch (error) {
+    //   console.log('[signInError] : ', error);
+    // }
+    const loginHandler = setLoginToken(true);
   }
 
   const signUp = () => {
@@ -73,7 +74,7 @@ const SignInScreen = ({ navigation }) => {
     <View style={styles.container}>
       <View style={{ flex: 1 }}>
         <Image
-          source={require('../assets/GREENEEText.png')}
+          source={require('../assets/img/GREENEEText.png')}
           style={styles.logoImage} />
       </View>
       <View style={{

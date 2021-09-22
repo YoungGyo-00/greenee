@@ -51,7 +51,7 @@ const SignUpScreen = ({ navigation }) => {
         navigation.navigate('SignIn');
       });
     } catch (error) {
-      Alert.alert('에러', '회원가입에 실패하였습니다. 다시 시도해주세요');
+      Alert.alert('에러', '회원가입에 실패하였습니다. 다시 시도해주세요.');
     }
 
   }
