@@ -66,6 +66,8 @@ const ProfileScreen = () => {
         setUserInfo(storedUserInfoJSON);
         setValue('name', storedUserInfoJSON.name);
         setValue('cellphone', storedUserInfoJSON.cellphone);
+        setValue('age', storedUserInfoJSON.age);
+        setSelectedValue(storedUserInfoJSON.gender);
       } catch (error) {
         Alert.alert('에러', '사용자 정보를 불러오는데 실패하였습니다.');
         console.log(error);
