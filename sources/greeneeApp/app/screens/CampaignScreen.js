@@ -12,7 +12,7 @@ const CampaignScreen = () => {
     const getData = () => {
       let response = [
         {
-          title: '제 25회 서울시 환경사진 공모전(~9/24 연장)',
+          title: '제 24회 프리플로깅 in Daejeon',
           content: '주최 : Greenee / 어느 기업',
           day: 12,
           img: ''
