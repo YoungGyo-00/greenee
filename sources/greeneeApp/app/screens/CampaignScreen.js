@@ -13,26 +13,26 @@ const CampaignScreen = () => {
       let response = [
         {
           title: '제 25회 서울시 환경사진 공모전(~9/24 연장)',
-          content: '서울특별시',
+          content: '주최 : Greenee / 어느 기업',
           day: 12,
           img: ''
         },
         {
-          title: '2021 유튜브 영상 공모전',
-          content: '한국외국어대학교 중남미 연구소 HK+ 사업단 지역인..',
+          title: '2021 길거리 쓰레기 제로 캠페인',
+          content: '주최 : Greenee / 어느 기업',
           day: 12,
           img: ''
 
         },
         {
-          title: '도시 소음 절감을 위한 해커톤 대회',
-          content: '주최 : 과학기술정보부 / 한국지능정보사회진흥원',
+          title: '대한민국 플라스틱 제로 달리기',
+          content: '주최 : Greenee / 어느 기업',
           day: 22,
           img: ''
         },
         {
-          title: '도시 소음 절감을 위한 해커톤 대회',
-          content: '주최 : 과학기술정보부 / 한국지능정보사회진흥원',
+          title: '한강공원 달리며 줍깅',
+          content: '주최 : Greenee / 어느 기업',
           day: 22,
           img: ''
         }
