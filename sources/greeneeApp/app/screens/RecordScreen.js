@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from '@react-navigation/native';
 
 import Record from "../assets/Components/Record";
 
@@ -8,7 +9,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 10,
   },
-  containerHeaderText:{
+  containerHeaderText: {
     fontSize: 16,
     marginBottom: 10
   }
@@ -17,38 +18,34 @@ const styles = StyleSheet.create({
 const RecordScreen = () => {
   const [data, setData] = useState([]);
 
-  useEffect(() => {
-    const getData = async () => {
-      // let response = await AsyncStorage.getItem('record');
-      let response = [
-        {
-          distance: 5.4,      // km단위
-          elapsedTime: 2400,   // 초단위
-          date: 1632472468608, // 밀리세컨드 단위
-          path: []
-        },
-        {
-          distance: 6.2,      // km단위
-          elapsedTime: 3260,   // 초단위
-          date: 1622471468608, // 밀리세컨드 단위
-          path: []
-        },
-        {
-          distance: 2.4,      // km단위
-          elapsedTime: 1000,   // 초단위
-          date: 1632432462608, // 밀리세컨드 단위
-          path: []
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const getData = async () => {
+        try {
+          await AsyncStorage.getAllKeys((err, keys) => {
+            AsyncStorage.multiGet(keys, (err, stores) => {
+              setData(stores);
+            });
+          });
+        } catch (error) {
+          console.log(error);
+          Alert.alert('오류', '저장된 데이터를 불러오는데 실패하였습니다.');
         }
-      ];
-      setData(response);
-    }
-    getData();
-  }, []);
+      };
+      getData();
+    }, [])
+  );
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.containerHeaderText}>최근 활동</Text>
       {data.map((item, key) => {
-        return <Record key={key} data={item}/>
+        if (item[0].split('2021')[0] == 'record') {
+          console.log(key, item);
+          return <Record key={key} data={item} />
+        }
+
       })}
     </ScrollView>
   );

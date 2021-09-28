@@ -10,7 +10,7 @@ const styles = StyleSheet.create({
     borderRightWidth: 3,
     borderTopWidth: 0.4,
     borderLeftWidth: 0.4,
-    marginBottom: 10,
+    marginBottom: 20,
     padding: 15
   },
   header: {
@@ -50,19 +50,22 @@ const covertSec = (sec) => {
   // return hours+":" + minutes+":"+seconds;
 }
 const Record = ({ data }) => {
-  let date = new Date(data.date);
-  let velocity = (data.distance / data.elapsedTime * 3600).toFixed(2);
+  let date = data[0].split('record')[1];
+  let dataJSON = JSON.parse(data[1]);
+  console.log(date);
+  console.log(dataJSON);
+  let velocity = (dataJSON.distance / dataJSON.elapsedTime * 3600).toFixed(2);
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>
           {
-            date.getFullYear() + '년 '
-            + date.getMonth() + '월 '
-            + date.getDay() + '일 '
-            + date.getHours() + '시 '
-            + date.getMinutes() + '분'
+            date.substring(0,4) + '년 '
+            + date.substring(4,6) + '월 '
+            + date.substring(6,8) + '일 '
+            + date.substring(8,10) + '시 '
+            + date.substring(10,12) + '분'
           }
         </Text>
         <TouchableOpacity>
@@ -71,7 +74,7 @@ const Record = ({ data }) => {
       </View>
       <View style={styles.body}>
         <View style={styles.items}>
-          <Text style={styles.content}>{data.distance}</Text>
+          <Text style={styles.content}>{dataJSON.distance}</Text>
           <Text style={styles.unit}>Km</Text>
         </View>
         <View style={styles.items}>
@@ -79,7 +82,7 @@ const Record = ({ data }) => {
           <Text style={styles.unit}>Km/h</Text>
         </View>
         <View style={styles.items}>
-          <Text style={styles.content}>{covertSec(data.elapsedTime)}</Text>
+          <Text style={styles.content}>{covertSec(dataJSON.elapsedTime)}</Text>
           <Text style={styles.unit}>시간</Text>
         </View>
       </View>

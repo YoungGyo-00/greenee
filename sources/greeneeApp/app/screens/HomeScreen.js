@@ -1,11 +1,13 @@
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, Alert, Modal, StatusBar } from 'react-native';
-import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import Icon from 'react-native-vector-icons/Ionicons';
 import LinearGradient from 'react-native-linear-gradient';
 
 import { COLOR } from "../config/styles";
+import { start, stop } from '../assets/Controller/Geolocation';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const styles = StyleSheet.create({
   container: {
@@ -103,6 +105,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 0.4,
   }
 });
+
 const weatherOptions = {
   Thunderstorm: {
     iconName: "thunderstorm-outline",
@@ -201,7 +204,7 @@ const SettingPanel = () => {
             <Icon
               size={96}
               name={weatherOptions[weather.condition].iconName}
-              color="black"
+              color="white"
             />
             <Text style={styles.temp}>{weather.temp}°C</Text>
           </View>
@@ -241,46 +244,145 @@ const InstrumentPanel = ({ elapsedTime, speed, distance }) => {
     <View style={styles.instrumentPanel}>
       <View style={{ marginBottom: 10 }}>
         <Text >소요시간</Text>
-        <Text>{elapsedTime}</Text>
+        <Text>
+          {parseInt(elapsedTime / 3600) < 10
+            ? '0' + parseInt(elapsedTime / 3600)
+            : parseInt(elapsedTime / 3600)}
+          :
+          {parseInt((elapsedTime % 3600) / 60) < 10
+            ? '0' + parseInt((elapsedTime % 3600) / 60)
+            : parseInt((elapsedTime % 3600) / 60)}
+          :
+          {(elapsedTime % 60) < 10
+            ? '0' + parseInt(elapsedTime % 60)
+            : parseInt(elapsedTime % 60)}
+        </Text>
       </View>
       <View style={{ marginBottom: 10 }}>
         <Text>거리</Text>
-        <Text>{distance}km</Text>
+        <Text>{distance.toFixed(2)}km</Text>
       </View>
       <View>
         <Text>속도</Text>
-        <Text>{speed}km/h</Text>
+        <Text>{Math.round(speed * 10) / 10}km/h</Text>
       </View>
-    </View>
-  )
-}
-
-const StartButton = () => {
-  return (
-    <View>
-      <TouchableOpacity style={styles.startButton} onPress={() => {
-        console.log('pressed!');
-      }}>
-        <Text style={styles.startButtonText}>start</Text>
-      </TouchableOpacity>
     </View>
   )
 }
 
 const HomeScreen = () => {
+  const [location, setLocation] = useState({
+    longitude: '',
+    latitude: '',
+    altitude: '',
+    speed: '',
+    motion: '',
+    state: '',
+    distance: 0,
+  });
+  const [elapsedTime, setElapsedTime] = useState(0); // 소요시간
+  const [isPlaying, setIsPlaying] = useState(false); // 출발, 중지
+  const [startTime, setStartTime] = useState(0); // 소요시간을 구하기 위한 처음 시작 시간 
+  let distanceTmp = 0;
+  let path = [];
+
+  useEffect(() => {
+    if (isPlaying) {
+      const interval = setInterval(() => {
+        let nowTime = new Date();
+        let difTime = nowTime.getTime() - startTime.getTime();
+        console.log('[소요 시간]: ', difTime / 1000);
+        setElapsedTime(difTime / 1000);
+      }, 1000);
+      return () => {
+        clearInterval(interval);
+      }
+    }
+  }, [isPlaying, elapsedTime]);
+
+  const geolocationCallback = (obj) => {
+    distanceTmp = distanceTmp + obj.distance;
+    setLocation({ ...obj, distance: distanceTmp });
+    // path.push({ latitude: obj.latitude, longitude: obj.longitude });
+    console.log('[path] : ', path);
+  }
+
+  const StartButton = () => {
+    return (
+      <View>
+        <TouchableOpacity style={styles.startButton} onPress={() => {
+          console.log('pressed!');
+          start(geolocationCallback);
+          setIsPlaying(!isPlaying);
+          setStartTime(new Date());
+        }}>
+          <Text style={styles.startButtonText}>start</Text>
+        </TouchableOpacity>
+      </View>
+    )
+  }
+
+  const StopButton = () => {
+    return (
+      <View>
+        <TouchableOpacity style={styles.startButton} onPress={() => {
+          console.log('pressed!');
+          const storeInfo = async () => {
+            try {
+              const info = {
+                distance: location.distance.toFixed(2),
+                elapsedTime: elapsedTime.toFixed(0)
+              };
+
+              let today = new Date();
+              let year = today.getFullYear();
+              let month = today.getMonth() + 1 > 9 ? today.getMonth() + 1 : '0' + (today.getMonth() + 1);
+              let date = today.getDate() > 9 ? today.getDate() : '0' + today.getDate();
+              let hours = today.getHours() > 9 ? today.getHours() : '0' + today.getHours();
+              let minutes = today.getMinutes() > 9 ? today.getMinutes() : '0' + today.getMinutes();
+              let seconds = today.getSeconds() > 9 ? today.getSeconds() : '0' + today.getSeconds();
+
+              let keyString = 'record' + year + month + date + hours + minutes + seconds;
+              await AsyncStorage.setItem(keyString, JSON.stringify(info));
+              Alert.alert('성공', '플로깅 기록이 저장되었습니다. 기록 탭에서 확인해보세요!');
+
+            } catch (error) {
+              console.log(error);
+              Alert.alert('실패', '오류로 인하여 저장에 실패하였습니다. 관리자에게 문의해주세요!');
+            }
+          }
+          storeInfo();
+          stop();
+          setIsPlaying(!isPlaying);
+          setElapsedTime(0);
+          distanceTmp = 0;
+          setLocation({ ...location, distance: 0, speed: 0 })
+        }}>
+          <Text style={styles.startButtonText}>stop</Text>
+        </TouchableOpacity>
+      </View>
+    )
+  }
+
   return (
     <View style={styles.container}>
       <MapView
         style={styles.container}
         provider={PROVIDER_GOOGLE}
         initialRegion={{
-          latitude: 37.28825,
-          longitude: 127.5324,
-          latitudeDelta: 2,
-          longitudeDelta: 2,
-        }} />
-      <InstrumentPanel elapsedTime={0} speed={0} distance={0} />
-      <StartButton />
+          latitude: 37.533809,
+          longitude: 126.994563,
+          latitudeDelta: 0.3,
+          longitudeDelta: 0.3,
+        }} >
+          <Polyline 
+            coordinates={path}
+            strokeColor={COLOR.MAIN}
+            strokeWidth={7}
+          />
+      </MapView>
+      <InstrumentPanel elapsedTime={elapsedTime} speed={location.speed} distance={location.distance} />
+      {isPlaying ? <StopButton /> : <StartButton />}
       <SettingPanel />
       <NoticePanel />
     </View>
