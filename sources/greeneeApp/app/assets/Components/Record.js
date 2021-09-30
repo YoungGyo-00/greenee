@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
 
 const styles = StyleSheet.create({
   container: {
@@ -50,10 +51,11 @@ const covertSec = (sec) => {
   // return hours+":" + minutes+":"+seconds;
 }
 const Record = ({ data }) => {
+  const navigation = useNavigation();
+
   let date = data[0].split('record')[1];
   let dataJSON = JSON.parse(data[1]);
-  console.log(date);
-  console.log(dataJSON);
+  console.log('[dataJSON.path] : ', dataJSON.path);
   let velocity = (dataJSON.distance / dataJSON.elapsedTime * 3600).toFixed(2);
 
   return (
@@ -68,7 +70,15 @@ const Record = ({ data }) => {
             + date.substring(10,12) + '분'
           }
         </Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={()=>{
+          console.log('#######################################');
+          navigation.navigate('결과',{
+            date: date,
+            distance: dataJSON.distance,
+            elapsedTime: dataJSON.elapsedTime,
+            path: dataJSON.path
+          });
+        }}>
           <Icon name="ellipsis-horizontal-outline" size={16}></Icon>
         </TouchableOpacity>
       </View>

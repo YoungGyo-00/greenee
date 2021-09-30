@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, Alert, Modal, StatusBar } from 'react-native';
 import MapView, { Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -183,7 +183,7 @@ const NoticePanel = () => {
   );
 }
 
-const SettingPanel = () => {
+const SettingPanel = ({ location }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [weather, setWeather] = useState({ condition: 'Clouds', temp: '' });
   return (
@@ -227,7 +227,7 @@ const SettingPanel = () => {
             main: { temp },
             weather
           }
-        } = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=37&lon=127.5&appid=78cb44672b70346d875e57f7a3e79388`);
+        } = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${location.latitude == 0 ? 37 : location.latitude}&lon=${location.latitude == 0 ? 127.5 : location.latitude}&appid=78cb44672b70346d875e57f7a3e79388`);
         temp = Math.round((temp - 273.15) * 10) / 10;
         console.log(['[날씨와 온도] : ', weather[0].main, temp])
         setWeather({ condition: weather[0].main, temp });
@@ -272,10 +272,10 @@ const InstrumentPanel = ({ elapsedTime, speed, distance }) => {
 
 const HomeScreen = () => {
   const [location, setLocation] = useState({
-    longitude: '',
-    latitude: '',
-    altitude: '',
-    speed: '',
+    longitude: 0,
+    latitude: 0,
+    altitude: 0,
+    speed: 0,
     motion: '',
     state: '',
     distance: 0,
@@ -283,8 +283,12 @@ const HomeScreen = () => {
   const [elapsedTime, setElapsedTime] = useState(0); // 소요시간
   const [isPlaying, setIsPlaying] = useState(false); // 출발, 중지
   const [startTime, setStartTime] = useState(0); // 소요시간을 구하기 위한 처음 시작 시간 
+  const [path, setPath] = useState([]);
+
+  const polylineRef = useRef();
+
   let distanceTmp = 0;
-  let path = [];
+  var pathTmp = [];
 
   useEffect(() => {
     if (isPlaying) {
@@ -303,8 +307,10 @@ const HomeScreen = () => {
   const geolocationCallback = (obj) => {
     distanceTmp = distanceTmp + obj.distance;
     setLocation({ ...obj, distance: distanceTmp });
-    // path.push({ latitude: obj.latitude, longitude: obj.longitude });
-    console.log('[path] : ', path);
+    pathTmp.push({ latitude: obj.latitude, longitude: obj.longitude });
+    setPath(pathTmp)
+    polylineRef.current.setNativeProps({ coordinates: [...pathTmp] });
+
   }
 
   const StartButton = () => {
@@ -331,7 +337,8 @@ const HomeScreen = () => {
             try {
               const info = {
                 distance: location.distance.toFixed(2),
-                elapsedTime: elapsedTime.toFixed(0)
+                elapsedTime: elapsedTime.toFixed(0),
+                path: path
               };
 
               let today = new Date();
@@ -343,6 +350,7 @@ const HomeScreen = () => {
               let seconds = today.getSeconds() > 9 ? today.getSeconds() : '0' + today.getSeconds();
 
               let keyString = 'record' + year + month + date + hours + minutes + seconds;
+              console.log(info);
               await AsyncStorage.setItem(keyString, JSON.stringify(info));
               Alert.alert('성공', '플로깅 기록이 저장되었습니다. 기록 탭에서 확인해보세요!');
 
@@ -352,6 +360,7 @@ const HomeScreen = () => {
             }
           }
           storeInfo();
+          polylineRef.current.setNativeProps({ coordinates: [] });
           stop();
           setIsPlaying(!isPlaying);
           setElapsedTime(0);
@@ -375,15 +384,16 @@ const HomeScreen = () => {
           latitudeDelta: 0.3,
           longitudeDelta: 0.3,
         }} >
-          <Polyline 
-            coordinates={path}
-            strokeColor={COLOR.MAIN}
-            strokeWidth={7}
-          />
+        <Polyline
+          ref={polylineRef}
+          coordinates={[]}
+          strokeColor={COLOR.MAIN}
+          strokeWidth={7}
+        />
       </MapView>
       <InstrumentPanel elapsedTime={elapsedTime} speed={location.speed} distance={location.distance} />
       {isPlaying ? <StopButton /> : <StartButton />}
-      <SettingPanel />
+      <SettingPanel location={location} />
       <NoticePanel />
     </View>
 

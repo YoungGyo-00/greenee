@@ -3,10 +3,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import MissionTab from '../../screens/MissionTab';
-import RecordScreen from '../../screens/RecordScreen';
 import HomeScreen from '../../screens/HomeScreen';
 import CommunityTab from '../../screens/CommunityTab';
 import ProfileScreen from '../../screens/ProfileScreen';
+import RecordStackNavigation from '../Stack/RecordStackNavigation';
 
 import { COLOR } from '../../config/styles';
 const Tab = createBottomTabNavigator();
@@ -35,7 +35,7 @@ const TabNavigation = () => {
               <Icon name="analytics-outline" color={color} size={size} />
             ),
           }}
-          component={RecordScreen} />
+          component={RecordStackNavigation} />
         <Tab.Screen
           name="미션"
           options={{
