@@ -1,10 +1,11 @@
 import React, { useRef, useState, useContext } from "react";
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, Alert } from "react-native";
 import axios from 'axios';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { COLOR } from "../config/styles";
 import loginContext from '../context/Context';
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const styles = StyleSheet.create({
   container: {
@@ -71,51 +72,53 @@ const SignInScreen = ({ navigation }) => {
     navigation.navigate('SignUp');
   }
   return (
-    <View style={styles.container}>
-      <View style={{ flex: 1 }}>
-        <Image
-          source={require('../assets/img/GREENEEText.png')}
-          style={styles.logoImage} />
-      </View>
-      <View style={{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <TextInput
-          style={styles.inputText}
-          placeholder="아이디"
-          returnKeyType="next"
-          onSubmitEditing={() => ref_pwd.current.focus()}
-          onChangeText={id => {
-            setUserInfo({ ...userInfo, id: id });
-            console.log('[아이디] : ', id);
-          }}
-        />
-        <TextInput
-          style={styles.inputText}
-          secureTextEntry={true}
-          ref={ref_pwd}
-          placeholder="비밀번호"
-          onChangeText={pwd => {
-            setUserInfo({ ...userInfo, pwd: pwd });
-            console.log('[비밀번호] : ', pwd);
-          }} />
-      </View>
-      <View style={{ flex: 1 }}>
-        <TouchableOpacity style={styles.button} onPress={() => {
-          console.log('[userInfo] : ', userInfo);
-          signIn();
+    <KeyboardAwareScrollView>
+      <View style={styles.container}>
+        <View style={{ flex: 1 }}>
+          <Image
+            source={require('../assets/img/GREENEEText.png')}
+            style={styles.logoImage} />
+        </View>
+        <View style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center'
         }}>
-          <Text style={styles.buttonText}>로그인</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => {
-          signUp();
-        }}>
-          <Text style={styles.buttonText}>회원가입</Text>
-        </TouchableOpacity>
+          <TextInput
+            style={styles.inputText}
+            placeholder="아이디"
+            returnKeyType="next"
+            onSubmitEditing={() => ref_pwd.current.focus()}
+            onChangeText={id => {
+              setUserInfo({ ...userInfo, id: id });
+              console.log('[아이디] : ', id);
+            }}
+          />
+          <TextInput
+            style={styles.inputText}
+            secureTextEntry={true}
+            ref={ref_pwd}
+            placeholder="비밀번호"
+            onChangeText={pwd => {
+              setUserInfo({ ...userInfo, pwd: pwd });
+              console.log('[비밀번호] : ', pwd);
+            }} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <TouchableOpacity style={styles.button} onPress={() => {
+            console.log('[userInfo] : ', userInfo);
+            signIn();
+          }}>
+            <Text style={styles.buttonText}>로그인</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={() => {
+            signUp();
+          }}>
+            <Text style={styles.buttonText}>회원가입</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </KeyboardAwareScrollView>
   );
 
 }
