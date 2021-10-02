@@ -1,25 +1,42 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
-import MapView, { Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image } from "react-native";
+import MapView, { Polyline, PROVIDER_GOOGLE, Marker } from 'react-native-maps';
+import { useNavigation } from '@react-navigation/native';
 
 import { COLOR } from "../../config/styles";
 const styles = StyleSheet.create({
   container: {
-    flex:1,
+    flex: 1,
     padding: 15,
   },
   title: {
     fontWeight: '500',
     fontSize: 16
   },
-  header:{
+  header: {
     marginBottom: 15,
-  }, 
-  body:{
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+
+  },
+  button: {
+    backgroundColor: COLOR.MAIN,
+    paddingTop: 5,
+    paddingRight: 10,
+    paddingBottom: 5,
+    paddingLeft: 10,
+    borderRadius: 10
+  },
+  buttonText: {
+    color: 'white'
+  },
+  body: {
     height: 300,
     marginBottom: 20,
   },
-  tail:{
+  tail: {
     flexDirection: 'row',
     justifyContent: "space-around",
     height: 50,
@@ -34,7 +51,10 @@ const styles = StyleSheet.create({
   unit: {
     fontSize: 11,
     color: '#5d5d5d',
-  }
+  },
+  imageContainer: {
+    flexDirection: 'row',
+  },
 
 })
 const covertSec = (sec) => {
@@ -50,19 +70,36 @@ const covertSec = (sec) => {
 }
 
 const RecoredResult = ({ route }) => {
-  console.log('[route.params] : ', route.params);
+  const navigation = useNavigation();
+  console.log(route.params.src[0].src)
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>
-          {
-            route.params.date.substring(0, 4) + '년 '
-            + route.params.date.substring(4, 6) + '월 '
-            + route.params.date.substring(6, 8) + '일 '
-            + route.params.date.substring(8, 10) + '시 '
-            + route.params.date.substring(10, 12) + '분'
-          }의 경로
-        </Text>
+        <View>
+          <Text style={styles.title}>
+            {
+              route.params.date.substring(0, 4) + '년 '
+              + route.params.date.substring(4, 6) + '월 '
+              + route.params.date.substring(6, 8) + '일 '
+              + route.params.date.substring(8, 10) + '시 '
+              + route.params.date.substring(10, 12) + '분'
+            }의 경로
+          </Text>
+        </View>
+        <View>
+          <TouchableOpacity onPress={async () => {
+            try {
+              await AsyncStorage.removeItem(route.params.key);
+              navigation.goBack();
+            } catch (error) {
+              console.log(error);
+              Alert.alert('실패', '삭제 중 오류가 발생하였습니다. 다시 시도해 주세요!');
+            }
+          }} style={styles.button}>
+            <Text style={styles.buttonText}>삭제하기</Text>
+          </TouchableOpacity>
+        </View>
+
       </View>
       <View style={styles.body}>
         <MapView
@@ -74,6 +111,13 @@ const RecoredResult = ({ route }) => {
             latitudeDelta: 0.02,
             longitudeDelta: 0.02,
           }} >
+          {
+            route.params.src.map((item,key)=>{
+              if(item.latitude != 0){
+                return <Marker key={key} coordinate={{latitude: item.latitude, longitude: item.longitude}}/>
+              }
+            })
+          }
           <Polyline
             coordinates={route.params.path}
             strokeColor={COLOR.MAIN}
@@ -93,11 +137,17 @@ const RecoredResult = ({ route }) => {
           <Text style={styles.unit}>Km/h</Text>
         </View>
         <View style={styles.items}>
-        <Text style={styles.unit}>시간</Text>
+          <Text style={styles.unit}>시간</Text>
           <Text style={styles.content}>{covertSec(route.params.elapsedTime)}</Text>
           <Text style={styles.unit}>hh:mm:ss</Text>
         </View>
       </View>
+      <ScrollView style={styles.imageContainer} horizontal={true}>
+        {route.params.src.map((item, key)=>{
+          return <Image source={{ uri: "data:image/png;base64,"+ item.src }} key={key} style={{ width: 100, height: 160, resizeMode: "contain", marginRight: 10}} />
+        })}
+        
+      </ScrollView>
     </ScrollView>
   )
 };

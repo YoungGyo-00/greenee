@@ -42,10 +42,8 @@ const RecordScreen = () => {
       <Text style={styles.containerHeaderText}>최근 활동</Text>
       {data.map((item, key) => {
         if (item[0].split('2021')[0] == 'record') {
-          console.log(key, item);
           return <Record key={key} data={item} />
         }
-
       })}
     </ScrollView>
   );

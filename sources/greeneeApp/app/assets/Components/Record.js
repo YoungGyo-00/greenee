@@ -39,6 +39,7 @@ const styles = StyleSheet.create({
     color: '#5d5d5d',
   }
 });
+
 const covertSec = (sec) => {
   let hours = parseInt(sec / 3600);
   let minutes = parseInt((sec % 3600) / 60);
@@ -50,12 +51,12 @@ const covertSec = (sec) => {
 
   // return hours+":" + minutes+":"+seconds;
 }
+
 const Record = ({ data }) => {
   const navigation = useNavigation();
 
   let date = data[0].split('record')[1];
   let dataJSON = JSON.parse(data[1]);
-  console.log('[dataJSON.path] : ', dataJSON.path);
   let velocity = (dataJSON.distance / dataJSON.elapsedTime * 3600).toFixed(2);
 
   return (
@@ -71,12 +72,13 @@ const Record = ({ data }) => {
           }
         </Text>
         <TouchableOpacity onPress={()=>{
-          console.log('#######################################');
           navigation.navigate('결과',{
+            key: data[0],
             date: date,
             distance: dataJSON.distance,
             elapsedTime: dataJSON.elapsedTime,
-            path: dataJSON.path
+            path: dataJSON.path,
+            src: dataJSON.images
           });
         }}>
           <Icon name="ellipsis-horizontal-outline" size={16}></Icon>

@@ -1,9 +1,10 @@
 import axios from 'axios';
 import React, { useEffect, useState, useRef } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity, Alert, Modal, StatusBar } from 'react-native';
-import MapView, { Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+import { Text, View, StyleSheet, TouchableOpacity, Alert, Modal, StatusBar, ImagePickerIOS } from 'react-native';
+import MapView, { Polyline, PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import Icon from 'react-native-vector-icons/Ionicons';
 import LinearGradient from 'react-native-linear-gradient';
+import * as ImagePicker from 'react-native-image-picker';
 
 import { COLOR } from "../config/styles";
 import { start, stop } from '../assets/Controller/Geolocation';
@@ -103,6 +104,18 @@ const styles = StyleSheet.create({
     borderRightWidth: 3,
     borderTopWidth: 0.4,
     borderLeftWidth: 0.4,
+  },
+  cameraButton: {
+    position: 'absolute',
+    bottom: 10,
+    alignSelf: 'center',
+    transform: [{ translateX: 90 }],
+    paddingTop: 10,
+    paddingBottom: 10,
+    paddingLeft: 10,
+    paddingRight: 10,
+    borderRadius: 5,
+    backgroundColor: COLOR.MAIN
   }
 });
 
@@ -168,6 +181,8 @@ const weatherOptions = {
     subtitle: "운전에 조심해야돼요."
   }
 };
+
+let images = [];
 
 const NoticePanel = () => {
   return (
@@ -269,6 +284,46 @@ const InstrumentPanel = ({ elapsedTime, speed, distance }) => {
     </View>
   )
 }
+const sendToServer = async (obj, latitude, longitude) => {
+  images.push({
+    src : obj.base64,
+    latitude: latitude,
+    longitude: longitude
+  });
+  console.log(images.length);
+}
+const CameraButton = ({ latitude, longitude }) => {
+  return (
+    <View style={styles.cameraButton}>
+      <TouchableOpacity onPress={() => {
+        const launchCamera = () => {
+          let options = {
+            mediaType: 'photo',
+            maxWidth: 512,
+            maxHeight: 512,
+            storageOptions: {
+              skipBackup: true,
+            },
+            includeBase64: true
+          };
+          ImagePicker.launchCamera(options, callback => {
+            if (callback.didCancel) {
+              Alert.alert('사진을 선택하지 않음');
+            } else if (callback.error) {
+              console.log('ImagePicker Error: ', callback.error);
+              Alert.alert('', callback.error);
+            } else {
+              sendToServer(callback.assets[0], latitude, longitude);
+            }
+          });
+        }
+        launchCamera();
+      }}>
+        <Icon name="camera-outline" size={18} color={COLOR.WHITE} />
+      </TouchableOpacity>
+    </View>
+  );
+}
 
 const HomeScreen = () => {
   const [location, setLocation] = useState({
@@ -284,6 +339,7 @@ const HomeScreen = () => {
   const [isPlaying, setIsPlaying] = useState(false); // 출발, 중지
   const [startTime, setStartTime] = useState(0); // 소요시간을 구하기 위한 처음 시작 시간 
   const [path, setPath] = useState([]);
+  const [mapRegion, setMapRegion] = useState({ latitude: 0.0, longitude: 0.0 });
 
   const polylineRef = useRef();
 
@@ -310,7 +366,6 @@ const HomeScreen = () => {
     pathTmp.push({ latitude: obj.latitude, longitude: obj.longitude });
     setPath(pathTmp)
     polylineRef.current.setNativeProps({ coordinates: [...pathTmp] });
-
   }
 
   const StartButton = () => {
@@ -338,10 +393,11 @@ const HomeScreen = () => {
               const info = {
                 distance: location.distance.toFixed(2),
                 elapsedTime: elapsedTime.toFixed(0),
-                path: path
+                path: path,
+                images: images
               };
 
-              let today = new Date();
+              let today = new Date(new Date().getTime()+9*60*60*1000);
               let year = today.getFullYear();
               let month = today.getMonth() + 1 > 9 ? today.getMonth() + 1 : '0' + (today.getMonth() + 1);
               let date = today.getDate() > 9 ? today.getDate() : '0' + today.getDate();
@@ -365,6 +421,7 @@ const HomeScreen = () => {
           setIsPlaying(!isPlaying);
           setElapsedTime(0);
           distanceTmp = 0;
+          images = [];
           setLocation({ ...location, distance: 0, speed: 0 })
         }}>
           <Text style={styles.startButtonText}>stop</Text>
@@ -383,7 +440,12 @@ const HomeScreen = () => {
           longitude: 126.994563,
           latitudeDelta: 0.3,
           longitudeDelta: 0.3,
-        }} >
+        }}
+
+        onRegionChangeComplete={(region) => {
+          setMapRegion(region);
+        }}
+      >
         <Polyline
           ref={polylineRef}
           coordinates={[]}
@@ -392,7 +454,7 @@ const HomeScreen = () => {
         />
       </MapView>
       <InstrumentPanel elapsedTime={elapsedTime} speed={location.speed} distance={location.distance} />
-      {isPlaying ? <StopButton /> : <StartButton />}
+      {isPlaying ? <><StopButton /><CameraButton latitude={location.latitude} longitude={location.longitude} /></> : <StartButton />}
       <SettingPanel location={location} />
       <NoticePanel />
     </View>
