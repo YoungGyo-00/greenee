@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { View, ScrollView } from 'react-native';
-import { useState } from "react/cjs/react.development";
 import Campaign from "../assets/Components/Campaign";
 import SearchBar from "../assets/Components/SearchBar";
 
