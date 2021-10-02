@@ -183,6 +183,7 @@ const weatherOptions = {
 };
 
 let images = [];
+let trashCans = [];
 
 const NoticePanel = () => {
   return (
@@ -198,9 +199,17 @@ const NoticePanel = () => {
   );
 }
 
-const SettingPanel = ({ location }) => {
+
+
+const SettingPanel = ({ location, mapRegion, isPlaying }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [weather, setWeather] = useState({ condition: 'Clouds', temp: '' });
+
+  const createTrashCans = () => {
+    trashCans.push({ latitude: mapRegion.latitude, longitude: mapRegion.longitude });
+    console.log(trashCans);
+  }
+
   return (
     <View style={styles.settingPanel}>
       <Modal
@@ -232,7 +241,7 @@ const SettingPanel = ({ location }) => {
         </LinearGradient>
       </Modal>
       <TouchableOpacity style={{ marginBottom: 20 }} onPress={() => {
-        Alert.alert('아차차!', '준비중인 기능입니다 조금만 기다려주세요 :(');
+        createTrashCans();
       }}>
         <Icon name="trash-outline" color={COLOR.MAIN} size={30}></Icon>
       </TouchableOpacity>
@@ -286,7 +295,7 @@ const InstrumentPanel = ({ elapsedTime, speed, distance }) => {
 }
 const sendToServer = async (obj, latitude, longitude) => {
   images.push({
-    src : obj.base64,
+    src: obj.base64,
     latitude: latitude,
     longitude: longitude
   });
@@ -397,7 +406,7 @@ const HomeScreen = () => {
                 images: images
               };
 
-              let today = new Date(new Date().getTime()+9*60*60*1000);
+              let today = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
               let year = today.getFullYear();
               let month = today.getMonth() + 1 > 9 ? today.getMonth() + 1 : '0' + (today.getMonth() + 1);
               let date = today.getDate() > 9 ? today.getDate() : '0' + today.getDate();
@@ -422,7 +431,7 @@ const HomeScreen = () => {
           setElapsedTime(0);
           distanceTmp = 0;
           images = [];
-          setLocation({ ...location, distance: 0, speed: 0 })
+          setLocation({ ...location, distance: 0, speed: 0 });
         }}>
           <Text style={styles.startButtonText}>stop</Text>
         </TouchableOpacity>
@@ -446,6 +455,34 @@ const HomeScreen = () => {
           setMapRegion(region);
         }}
       >
+        {
+          trashCans.map((item, key) => {
+            return (
+              <Marker draggable={true}
+                coordinate={{ latitude: item.latitude, longitude: item.longitude }}
+                image={require('../assets/img/delete.png')}
+                onDragEnd={(e) => {
+                  trashCans[key].latitude = e.nativeEvent.coordinate.latitude;
+                  trashCans[key].longitude = e.nativeEvent.coordinate.longitude;
+                }}
+                onPress={() => {
+                  Alert.alert('', '삭제하시겠습니까?',
+                    [
+                      {
+                        text: '예',
+                        onPress: () => {
+                          trashCans.splice(key, 1);
+                        }
+                      },
+                      {
+                        text: '아니오',
+                      }
+                    ]);
+                }}
+              />
+            )
+          })
+        }
         <Polyline
           ref={polylineRef}
           coordinates={[]}
@@ -455,7 +492,7 @@ const HomeScreen = () => {
       </MapView>
       <InstrumentPanel elapsedTime={elapsedTime} speed={location.speed} distance={location.distance} />
       {isPlaying ? <><StopButton /><CameraButton latitude={location.latitude} longitude={location.longitude} /></> : <StartButton />}
-      <SettingPanel location={location} />
+      <SettingPanel location={location} mapRegion={mapRegion} isPlaying={isPlaying} />
       <NoticePanel />
     </View>
 
