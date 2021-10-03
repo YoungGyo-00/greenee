@@ -60,45 +60,46 @@ const Record = ({ data }) => {
   let velocity = (dataJSON.distance / dataJSON.elapsedTime * 3600).toFixed(2);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>
-          {
-            date.substring(0,4) + '년 '
-            + date.substring(4,6) + '월 '
-            + date.substring(6,8) + '일 '
-            + date.substring(8,10) + '시 '
-            + date.substring(10,12) + '분'
-          }
-        </Text>
-        <TouchableOpacity onPress={()=>{
-          navigation.navigate('결과',{
-            key: data[0],
-            date: date,
-            distance: dataJSON.distance,
-            elapsedTime: dataJSON.elapsedTime,
-            path: dataJSON.path,
-            src: dataJSON.images
-          });
-        }}>
+    <TouchableOpacity onPress={() => {
+      navigation.navigate('결과', {
+        key: data[0],
+        date: date,
+        distance: dataJSON.distance,
+        elapsedTime: dataJSON.elapsedTime,
+        path: dataJSON.path,
+        src: dataJSON.images
+      });
+    }}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerText}>
+            {
+              date.substring(0, 4) + '년 '
+              + date.substring(4, 6) + '월 '
+              + date.substring(6, 8) + '일 '
+              + date.substring(8, 10) + '시 '
+              + date.substring(10, 12) + '분'
+            }
+          </Text>
+
           <Icon name="ellipsis-horizontal-outline" size={16}></Icon>
-        </TouchableOpacity>
+        </View>
+        <View style={styles.body}>
+          <View style={styles.items}>
+            <Text style={styles.content}>{dataJSON.distance}</Text>
+            <Text style={styles.unit}>Km</Text>
+          </View>
+          <View style={styles.items}>
+            <Text style={styles.content}>{velocity}</Text>
+            <Text style={styles.unit}>Km/h</Text>
+          </View>
+          <View style={styles.items}>
+            <Text style={styles.content}>{covertSec(dataJSON.elapsedTime)}</Text>
+            <Text style={styles.unit}>시간</Text>
+          </View>
+        </View>
       </View>
-      <View style={styles.body}>
-        <View style={styles.items}>
-          <Text style={styles.content}>{dataJSON.distance}</Text>
-          <Text style={styles.unit}>Km</Text>
-        </View>
-        <View style={styles.items}>
-          <Text style={styles.content}>{velocity}</Text>
-          <Text style={styles.unit}>Km/h</Text>
-        </View>
-        <View style={styles.items}>
-          <Text style={styles.content}>{covertSec(dataJSON.elapsedTime)}</Text>
-          <Text style={styles.unit}>시간</Text>
-        </View>
-      </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 

@@ -183,7 +183,7 @@ const weatherOptions = {
 };
 
 let images = [];
-let trashCans = [];
+// let trashCans = [];
 
 const NoticePanel = () => {
   return (
@@ -199,14 +199,18 @@ const NoticePanel = () => {
   );
 }
 
-const SettingPanel = ({ location, mapRegion, isPlaying }) => {
+const SettingPanel = ({ location, mapRegion, isPlaying, trashCans, setTrashCans }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [weather, setWeather] = useState({ condition: 'Clouds', temp: '' });
 
   const createTrashCans = () => {
-    if (!isPlaying) {
-      trashCans.push({ latitude: mapRegion.latitude, longitude: mapRegion.longitude });
+    if (isPlaying) {
       console.log(trashCans);
+      let tmp = trashCans;
+      tmp.push({ latitude: mapRegion.latitude, longitude: mapRegion.longitude });
+      setTrashCans(tmp);
+    } else{
+      Alert.alert('오류','시작 이후 쓰레기통의 위치를 수정하거나 생성, 제거할 수 있습니다!');
     }
   }
 
@@ -351,7 +355,7 @@ const HomeScreen = () => {
   const [startTime, setStartTime] = useState(0); // 소요시간을 구하기 위한 처음 시작 시간 
   const [path, setPath] = useState([]);
   const [mapRegion, setMapRegion] = useState({ latitude: 0.0, longitude: 0.0 });
-
+  const [trashCans, setTrashCans] = useState([]);
   const polylineRef = useRef();
 
   let distanceTmp = 0;
@@ -381,7 +385,7 @@ const HomeScreen = () => {
         Alert.alert('오류', '쓰레기통 정보를 가져오는데 실패하였습니다. 앱을 재시작해주세요!');
       }
       if (tmp != null) {
-        trashCans = JSON.parse(tmp);
+        setTrashCans(JSON.parse(tmp));
       }
     }
     getTrashCan();
@@ -423,7 +427,7 @@ const HomeScreen = () => {
                 path: path,
                 images: images
               };
-
+              
               let today = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
               let year = today.getFullYear();
               let month = today.getMonth() + 1 > 9 ? today.getMonth() + 1 : '0' + (today.getMonth() + 1);
@@ -481,8 +485,10 @@ const HomeScreen = () => {
                 coordinate={{ latitude: item.latitude, longitude: item.longitude }}
                 image={require('../assets/img/delete.png')}
                 onDragEnd={(e) => {
-                  trashCans[key].latitude = e.nativeEvent.coordinate.latitude;
-                  trashCans[key].longitude = e.nativeEvent.coordinate.longitude;
+                  let tmp = trashCans;
+                  tmp[key].latitude = e.nativeEvent.coordinate.latitude;
+                  tmp[key].longitude = e.nativeEvent.coordinate.longitude;
+                  setTrashCans(tmp);
                 }}
                 onPress={() => {
                   if (isPlaying) {
@@ -491,7 +497,9 @@ const HomeScreen = () => {
                         {
                           text: '예',
                           onPress: () => {
-                            trashCans.splice(key, 1);
+                            let tmp = trashCans;
+                            tmp.splice(key, 1);
+                            setTrashCans(tmp);
                           }
                         },
                         {
@@ -513,7 +521,7 @@ const HomeScreen = () => {
       </MapView>
       <InstrumentPanel elapsedTime={elapsedTime} speed={location.speed} distance={location.distance} />
       {isPlaying ? <><StopButton /><CameraButton latitude={location.latitude} longitude={location.longitude} /></> : <StartButton />}
-      <SettingPanel location={location} mapRegion={mapRegion} isPlaying={isPlaying} />
+      <SettingPanel location={location} mapRegion={mapRegion} isPlaying={isPlaying} trashCans={trashCans} setTrashCans={setTrashCans}  />
       <NoticePanel />
     </View>
 
