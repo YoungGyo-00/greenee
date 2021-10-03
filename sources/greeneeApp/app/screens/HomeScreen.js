@@ -199,15 +199,15 @@ const NoticePanel = () => {
   );
 }
 
-
-
 const SettingPanel = ({ location, mapRegion, isPlaying }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [weather, setWeather] = useState({ condition: 'Clouds', temp: '' });
 
   const createTrashCans = () => {
-    trashCans.push({ latitude: mapRegion.latitude, longitude: mapRegion.longitude });
-    console.log(trashCans);
+    if (!isPlaying) {
+      trashCans.push({ latitude: mapRegion.latitude, longitude: mapRegion.longitude });
+      console.log(trashCans);
+    }
   }
 
   return (
@@ -293,6 +293,7 @@ const InstrumentPanel = ({ elapsedTime, speed, distance }) => {
     </View>
   )
 }
+
 const sendToServer = async (obj, latitude, longitude) => {
   images.push({
     src: obj.base64,
@@ -301,6 +302,7 @@ const sendToServer = async (obj, latitude, longitude) => {
   });
   console.log(images.length);
 }
+
 const CameraButton = ({ latitude, longitude }) => {
   return (
     <View style={styles.cameraButton}>
@@ -369,6 +371,22 @@ const HomeScreen = () => {
     }
   }, [isPlaying, elapsedTime]);
 
+  useEffect(() => {
+    const getTrashCan = async () => {
+      let tmp = ""
+      try {
+        tmp = await AsyncStorage.getItem('trashCans');
+      } catch (error) {
+        console.log('[getTrashCan] : ', error);
+        Alert.alert('오류', '쓰레기통 정보를 가져오는데 실패하였습니다. 앱을 재시작해주세요!');
+      }
+      if (tmp != null) {
+        trashCans = JSON.parse(tmp);
+      }
+    }
+    getTrashCan();
+  }, []);
+
   const geolocationCallback = (obj) => {
     distanceTmp = distanceTmp + obj.distance;
     setLocation({ ...obj, distance: distanceTmp });
@@ -417,6 +435,7 @@ const HomeScreen = () => {
               let keyString = 'record' + year + month + date + hours + minutes + seconds;
               console.log(info);
               await AsyncStorage.setItem(keyString, JSON.stringify(info));
+              await AsyncStorage.setItem('trashCans', JSON.stringify(trashCans));
               Alert.alert('성공', '플로깅 기록이 저장되었습니다. 기록 탭에서 확인해보세요!');
 
             } catch (error) {
@@ -458,7 +477,7 @@ const HomeScreen = () => {
         {
           trashCans.map((item, key) => {
             return (
-              <Marker draggable={true}
+              <Marker draggable={isPlaying} key={key}
                 coordinate={{ latitude: item.latitude, longitude: item.longitude }}
                 image={require('../assets/img/delete.png')}
                 onDragEnd={(e) => {
@@ -466,18 +485,20 @@ const HomeScreen = () => {
                   trashCans[key].longitude = e.nativeEvent.coordinate.longitude;
                 }}
                 onPress={() => {
-                  Alert.alert('', '삭제하시겠습니까?',
-                    [
-                      {
-                        text: '예',
-                        onPress: () => {
-                          trashCans.splice(key, 1);
+                  if (isPlaying) {
+                    Alert.alert('', '삭제하시겠습니까?',
+                      [
+                        {
+                          text: '예',
+                          onPress: () => {
+                            trashCans.splice(key, 1);
+                          }
+                        },
+                        {
+                          text: '아니오',
                         }
-                      },
-                      {
-                        text: '아니오',
-                      }
-                    ]);
+                      ]);
+                  }
                 }}
               />
             )
