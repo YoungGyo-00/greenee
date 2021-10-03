@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontWeight: '500',
-    fontSize: 16
+    fontSize: 14
   },
   header: {
     marginBottom: 15,
@@ -71,14 +71,12 @@ const covertSec = (sec) => {
 
 const RecoredResult = ({ route }) => {
   const navigation = useNavigation();
-  console.log(route.params.src[0].src)
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>
             {
-              route.params.date.substring(0, 4) + '년 '
               + route.params.date.substring(4, 6) + '월 '
               + route.params.date.substring(6, 8) + '일 '
               + route.params.date.substring(8, 10) + '시 '
@@ -106,13 +104,13 @@ const RecoredResult = ({ route }) => {
           style={styles.container}
           provider={PROVIDER_GOOGLE}
           initialRegion={{
-            latitude: route.params.path[0].latitude,
-            longitude: route.params.path[0].longitude,
+            latitude: route.params.path[0].latitude==0? 37.533809 : route.params.path[0].latitude ,
+            longitude: route.params.path[0].longitude==0? 126.994563 : route.params.path[0].longitude,
             latitudeDelta: 0.02,
             longitudeDelta: 0.02,
           }} >
           {
-            route.params.src.map((item,key)=>{
+            route.params?.src?.map((item,key)=>{
               if(item.latitude != 0){
                 return <Marker key={key} coordinate={{latitude: item.latitude, longitude: item.longitude}}/>
               }
@@ -143,7 +141,7 @@ const RecoredResult = ({ route }) => {
         </View>
       </View>
       <ScrollView style={styles.imageContainer} horizontal={true}>
-        {route.params.src.map((item, key)=>{
+        {route.params?.src?.map((item, key)=>{
           return <Image source={{ uri: "data:image/png;base64,"+ item.src }} key={key} style={{ width: 100, height: 160, resizeMode: "contain", marginRight: 10}} />
         })}
         
