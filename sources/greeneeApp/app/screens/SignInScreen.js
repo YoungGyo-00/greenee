@@ -65,7 +65,6 @@ const SignInScreen = ({ navigation }) => {
     } catch (error) {
       console.log('[signInError] : ', error);
     }
-    const loginHandler = setLoginToken(true);
   }
 
   const signUp = () => {
