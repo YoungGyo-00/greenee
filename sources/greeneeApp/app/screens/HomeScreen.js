@@ -376,6 +376,7 @@ const HomeScreen = () => {
   }, [isPlaying, elapsedTime]);
 
   useEffect(() => {
+    let today = new Date(new Date().getTime() + new Date().getTimezoneOffset()*60*1000 +9 * 60 * 60 * 1000);
     const getTrashCan = async () => {
       let tmp = ""
       try {
@@ -427,8 +428,7 @@ const HomeScreen = () => {
                 path: path,
                 images: images
               };
-              
-              let today = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
+              let today = new Date(new Date().getTime() + new Date().getTimezoneOffset()*60*1000 +9 * 60 * 60 * 1000);
               let year = today.getFullYear();
               let month = today.getMonth() + 1 > 9 ? today.getMonth() + 1 : '0' + (today.getMonth() + 1);
               let date = today.getDate() > 9 ? today.getDate() : '0' + today.getDate();
@@ -437,7 +437,7 @@ const HomeScreen = () => {
               let seconds = today.getSeconds() > 9 ? today.getSeconds() : '0' + today.getSeconds();
 
               let keyString = 'record' + year + month + date + hours + minutes + seconds;
-              console.log(info);
+              console.log(info, keyString);
               await AsyncStorage.setItem(keyString, JSON.stringify(info));
               await AsyncStorage.setItem('trashCans', JSON.stringify(trashCans));
               Alert.alert('성공', '플로깅 기록이 저장되었습니다. 기록 탭에서 확인해보세요!');
