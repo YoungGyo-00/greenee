@@ -12,20 +12,21 @@ router.use((req, res, next) => {
 });
 
 router.post('/join', isNotLoggedIn, async (req, res, next) => {
-	const {nick, phone, email, password } = req.body;
+	const {name, cellphone, id, pwd} = req.body;
 	try {
-		const exUser = await User.findOne({ where: {email} });
+		const exUser = await User.findOne({ where: {id} });
 		if (exUser) {
 			console.log('이미 회원인 상태입니다');
-			return res.redirect('/join?error=exist');
+			return res.status(400).send('이미 회원인 상태입니다');
 		}
-		const hash = await bcrypt.hash(password, 12);
+		const hash = await bcrypt.hash(pwd, 12);
 		await User.create({
 			name,
 			cellphone,
 			id,
 			pwd: hash,
 		});
+		console.log('회원가입 성공');
 		return res.status(201).send('회원가입 성공');
 	} catch (error) {
 		console.error(error);
@@ -48,7 +49,7 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
 				return next(loginError);
 			}
 			console.log('로그인 성공');
-			return res.redirect('/');
+			return res.status(200).send('로그인 성공');
 		});
 	})(req, res, next);
 });
@@ -57,7 +58,7 @@ router.get('/logout', isLoggedIn, (req, res) => {
 	req.logout();
 	req.session.destroy();
 	console.log('로그아웃 성공')
-	return res.redirect('/');
+	return res.status(200).send('로그아웃 성공');
 });
 
 module.exports = router;
