@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "root",
+    "password": "wldh1324@asa",
+    "database": "greenee",
+    "host": "192.59.157.52", 
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "root",
+    "password": "wldh1324@asa",
+    "database": "greenee",
+    "host": "192.59.157.52",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "root",
+    "password": "wldh1324@asa",
+    "database": "greenee",
+    "host": "192.59.157.52",
+    "dialect": "mysql"
+  }
+}
