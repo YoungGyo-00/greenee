@@ -1,14 +1,14 @@
 const express = require('express');
 const { User, Comment, Post } = require('../models');
-const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
+const { isLoggedIn, isNotLoggedIn, noPermission } = require('./middlewares');
 
 const router = express.Router();
 
-// 댓글 생성 기능 ex) /comments?postId=20
-router.post('/', isLoggedIn, checkPostId, (async (req, res, next) => { 
+// 댓글 생성 기능 (0)
+router.post('/', isLoggedIn, checkPostId, async (req, res, next) => { 
 	try {
 		const comment = await Comment.create({
-			postId: req.post.id,
+			postId: req.query.postId,
 			commenter: req.user.name,
 			comment: req.body.comment,
 		});
@@ -18,11 +18,11 @@ router.post('/', isLoggedIn, checkPostId, (async (req, res, next) => {
 		console.error(error);
 		next(error);
 	}
-}));
+});
 
-// 댓글 수정 및 삭제 기능 /comments/:id?postId=20 
-router.route('/:id', isLoggedIn, checkPostId, checkPermission)
-  .patch(async (req, res, next) => {
+// 댓글 수정 및 삭제 기능 (0)
+router.route('/:id')
+  .patch(isLoggedIn, checkPostId, checkPermission, async (req, res, next) => {
 	try {
 		const result = await Comment.update({
 			comment: req.body.comment,
@@ -30,7 +30,7 @@ router.route('/:id', isLoggedIn, checkPostId, checkPermission)
 			where: { 
 				postId: req.query.postId,
 				id: req.params.id,
-			},
+			}
 		});
 		console.log('수정 완료');
 		return res.status(201).send('수정 완료');
@@ -39,7 +39,7 @@ router.route('/:id', isLoggedIn, checkPostId, checkPermission)
 		next(error);
 	}
 })
-  .delete(async (req, res, next) => {
+  .delete(isLoggedIn, checkPostId, checkPermission, async (req, res, next) => {
 	try {
 		const result = await Comment.destroy({ 
 			where: {
@@ -57,27 +57,32 @@ router.route('/:id', isLoggedIn, checkPostId, checkPermission)
 
 module.exports = router;
 
-// 실제 db에 postId가 존재하는지 체크 쿼리를 postId로 줘야한다.
-function checkPostId (req, res, next) {
-	const postId = Post.findOne({
-		where: { id: req.query.postId },
-	}, (err, post) => {
-		if (err) return res.json(err);
+// 실제 db에 postId가 존재하는지 (0)
+async function checkPostId (req, res, next) {
+	try{
+		const post = await Post.findOne({
+			where: { id: req.query.postId },
+		});
 		res.locals.post = post;
 		next();
-	});
-}
+	} catch (error) {
+		console.error(error);
+		next(error);
+	}
+};
 
-// 사용자 접근 권한 있는지 확인
-function checkPermission(req, res, next) {
-	const comment = Comment.findOne({
-		where: { 
-			id: req.params.id 
-		},
-		attributes: 'commenter',
-	}, (err, comment) => {
-		if (err) return res.json(err);
+// 사용자 접근 권한 있는지 확인 (0)
+async function checkPermission(req, res, next) {
+	try{
+		const comment = await Comment.findOne({
+			where: { 
+				id: req.params.id 
+			},
+		})
 		if (req.user.name != comment.commenter) return noPermission(req, res);
 		next();
-	});
-}
+	} catch (error) {
+		console.error(error);
+		next(error);
+	}
+};

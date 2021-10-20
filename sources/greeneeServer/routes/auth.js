@@ -11,13 +11,18 @@ router.use((req, res, next) => {
 	next();
 });
 
+// 회원가입 (0)
 router.post('/join', isNotLoggedIn, async (req, res, next) => {
 	const {name, cellphone, id, pwd} = req.body;
 	try {
-		const exUser = await User.findOne({ where: {id} });
-		if (exUser) {
+		const exId = await User.findOne({ where: { id } });
+		const exPwd = await User.findOne({ whrer: { pwd } });
+		if (exId) {
 			console.log('이미 회원인 상태입니다');
 			return res.status(400).send('이미 회원인 상태입니다');
+		} else if (exPwd) {
+			console.log('이미 사용중인 비밀번호입니다');
+			return res.status(400).send('이미 사용중인 비밀번호입니다');
 		}
 		const hash = await bcrypt.hash(pwd, 12);
 		await User.create({
@@ -34,6 +39,7 @@ router.post('/join', isNotLoggedIn, async (req, res, next) => {
 	}
 });
 
+// 로그인 (0)
 router.post('/login', isNotLoggedIn, (req, res, next) => {
 	passport.authenticate('local', (authError, user, info) => {
 		if (authError) {
@@ -41,19 +47,20 @@ router.post('/login', isNotLoggedIn, (req, res, next) => {
 			return next(authError);
 		}
 		if (!user) {
-			return res.redirect(`/?loginError=${info.message}`);
+			return res.status(400).json('아이디 혹은 비밀번호가 존재하지 않습니다.');
 		}
 		return req.login(user, (loginError) => {
 			if (loginError) {
 				console.error(loginError);
 				return next(loginError);
 			}
-			console.log('로그인 성공');
-			return res.status(200).send('로그인 성공');
+			console.log(`${user.name}님 로그인 성공`);
+			return res.status(200).send(`${user.name}님 안녕하세요`);
 		});
 	})(req, res, next);
 });
 
+// 로그아웃 (0)
 router.get('/logout', isLoggedIn, (req, res) => {
 	req.logout();
 	req.session.destroy();

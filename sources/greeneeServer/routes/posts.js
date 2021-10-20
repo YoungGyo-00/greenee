@@ -36,25 +36,23 @@ router.post('/img', upload.single('img'), (req, res) => {
 	res.json({ url: `/img/${req.file.filename}` });
 })
 
-// 캠페인 모두 보여주기
+// 캠페인 모두 보여주기 (0)
 router.get('/', async (req, res, next) => {
 	try {
-		const post = Post.findAll({
-			order: ['createAt', 'desc'],
+		const post = await Post.findAll({
+			order: [['createdAt', 'desc']],
 		});
 		if (post) {
 			console.log('모든 캠페인 리스트 보여주기');
-			return res.json(post);
+			return res.status(200).send(post);
 		}
-		console.log('아직 공지된 캠페인이 없습니다');
-		return res.status(400).json('아직 공지된 캠페인이 없습니다.');
 	} catch (error) {
 		console.error(error);
 		next(error);
 	}
 }); 
 
-// 캠페인 작성
+// 캠페인 작성 (0)
 const upload2 = multer();
 router.post('/', upload2.none(), async (req, res, next) => {
 	try {
@@ -72,42 +70,40 @@ router.post('/', upload2.none(), async (req, res, next) => {
 	}
 });
 
-// 캠페인 편집
+// 캠페인 편집 (0)
 router.patch('/:id', upload2.none(), checkPermission, async (req, res, next) => {
 	try {
 		const result = await Post.update({
 			title: req.body.title,
 			content: req.body.content,
-			img: req.body.url,
-		}, {
-			where: { id: req.params.id },
-		});
+			img: req.body.url
+		}, {where: { id: req.params.id }});
 		console.log("캠페인 편집 완료");
-		return res.status(201).json(result);
+		return res.status(201).send('캠페인 편집 완료');
 	} catch (error) {
 		console.error(error);
 		next(error);
 	}
 });
 
-// 캠페인 삭제 
+// 캠페인 삭제 (0)
 router.delete('/:id', checkPermission, async (req, res, next) => {
 	try {
 		const result = await Post.destroy({
 			where: { id: req.params.id },
 		});
 		console.log("캠페인 삭제 완료");
-		res.json(result);
+		return res.status(201).send("캠페인 삭제 완료");
 	} catch (error) {
 		console.error(error);
 		next(error);
 	}
 });
 
-// 캠페인 소개 눌렀을 떄 
+// 캠페인 소개 눌렀을 떄 (0)
 router.get('/intro/:id', async (req, res, next) => {
 	try{
-		const post = Post.findOne({
+		const post = await Post.findOne({
 			where: { id: req.params.id }
 		});
 		console.log("캠페인 소개");
@@ -118,12 +114,12 @@ router.get('/intro/:id', async (req, res, next) => {
 	}
 });
 
-// 캠페인에 달린 댓글 보여주기 
+// 캠페인에 달린 댓글 보여주기 (0)
 router.get('/:id/comments', async (req, res, next) => {
 	try {
 		const comment = await Comment.findAll({
 			where: { postId: req.params.id },
-			order: ['createAt', 'desc'],
+			order: [['createdAt', 'desc']],
 		});
 		console.log("캠페인에 달린 댓글 보여주기");
 		return res.json(comment);
@@ -136,12 +132,13 @@ router.get('/:id/comments', async (req, res, next) => {
 
 // 팀원모집
 
-// 검색창 searchType= & searchText=
+
+// 검색창 (0)
 router.get('/search', async (req, res, next) => {
 	try{
 		const searchType = req.query.searchType;
 		const searchText = req.query.searchText;
-	
+		
 		if (searchType == 'title') {
 			const result = await Post.findAll({
 				where: {
@@ -150,6 +147,8 @@ router.get('/search', async (req, res, next) => {
 					}
 				}
 			});
+			console.log(result);
+			return res.status(200).json(result);
 		} else if (searchType == 'poster') {
 			const result = await Post.findAll({
 				where: {
@@ -158,9 +157,9 @@ router.get('/search', async (req, res, next) => {
 					}
 				}
 			});
+			console.log(result);
+			return res.status(200).json(result);
 		}
-		console.log(`${searchText}이 들어간 title 검색`);
-		return res.status(200).json(result);
 	} catch (error) {
 		console.error(error);
 		next(error);
@@ -170,16 +169,16 @@ router.get('/search', async (req, res, next) => {
 module.exports = router;
 
 
-// 접근 권한이 맞는지 확인 편집, 삭제시 사용할 예정
-function checkPermission(req, res, next) {
-	const post = Post.findOne({
-		where: { 
-			id: req.params.id 
-		},
-		attributes: 'poster',
-	}, (err, post) => {
-		if (err) return res.json(err);
+// 접근 권한 확인용 (0)
+async function checkPermission(req, res, next) {
+	try{
+		const post = await Post.findOne({
+			where: {id: req.params.id},
+		});
 		if (req.user.name != post.poster) return noPermission(req, res);
 		next();
-	});
-}
+	} catch (error) {
+		console.error(error);
+		next(error);
+	}
+};
