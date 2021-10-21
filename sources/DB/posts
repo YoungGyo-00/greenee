@@ -1,0 +1,12 @@
+CREATE TABLE `posts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(30) NOT NULL,
+  `content` varchar(140) NOT NULL,
+  `img` varchar(200) DEFAULT NULL,
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  `poster` varchar(10) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `poster` (`poster`),
+  CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`poster`) REFERENCES `users` (`name`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8
