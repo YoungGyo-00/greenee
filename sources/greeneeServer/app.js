@@ -12,6 +12,7 @@ const passportConfig = require('./passport');
 const authRouter = require('./routes/auth');
 const commentsRouter = require('./routes/comments');
 const postsRouter = require('./routes/posts');
+const { isLoggedIn, checkPostId } = require('./middlewares');
 
 const app = express();
 passportConfig();
@@ -45,8 +46,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/auth', authRouter);
-app.use('/comments', commentsRouter);
-app.use('/posts', postsRouter);
+app.use('/comments', isLoggedIn, checkPostId, commentsRouter);
+app.use('/posts', isLoggedIn, postsRouter);
 
 app.use((req,res,next) => {
 	const error = new Error(`${req.method} ${req.url} 라우터가 없습니다`);
