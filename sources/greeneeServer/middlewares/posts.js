@@ -7,7 +7,7 @@ exports.checkPermission = async (req, res, next) => {
 		const post = await Post.findOne({
 			where: {id: req.params.id},
 		});
-		if (req.user.name != post.poster) return noPermission(req, res);
+		if (req.user.name != post.writer) return noPermission(req, res);
 		next();
 	} catch (error) {
 		console.error(error);

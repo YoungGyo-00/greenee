@@ -1,15 +1,16 @@
 const express = require('express');
-const { checkPermission } = require('../middlewares/comments');
+const { checkPermission, checkPostId, checkBoardId } = require('../middlewares/comments');
 
 const Controller = require('../controllers/comments');
 const router = express.Router();
 
-// 댓글 생성 기능 (0)
-router.post('/', Controller.CreatePost);
+// 캠페인 댓글 생성 기능 (0)
+router.post('/post', checkPostId, Controller.CreatePost);
+router.post('/board', checkBoardId, Controller.CreateBoard);
 
-// 댓글 수정 및 삭제 기능 (0)
+// 캠페인 댓글 수정 및 삭제 기능 (0)
 router.route('/:id')
-  .patch(checkPermission, Controller.PatchPost)
-  .delete(checkPermission, Controller.DeletePost);
+  .patch(checkPermission, Controller.PatchComment)
+  .delete(checkPermission, Controller.DeleteComment);
 
 module.exports = router;

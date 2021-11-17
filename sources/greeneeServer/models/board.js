@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 
-module.exports = class Post extends Sequelize.Model {
+module.exports = class Board extends Sequelize.Model {
 	static init(sequelize) {
 		return super.init({
 			title: {
@@ -11,16 +11,12 @@ module.exports = class Post extends Sequelize.Model {
 				type: Sequelize.STRING(140),
 				allowNull: false,
 			},
-			img: {
-				type: Sequelize.STRING(200),
-				allowNull: true,
-			},	
 		}, {
 			sequelize,
 			timestamps: true,
 			underscored: false,
-			modelName: 'Post',
-			tableName: 'posts',
+			modelName: 'Board',
+			tableName: 'boards',
 			paranoid: false,
 			charset: 'utf8',
 			collate: 'utf8_general_ci',
@@ -28,7 +24,8 @@ module.exports = class Post extends Sequelize.Model {
 	}
 	
 	static associate(db) {
-		db.Post.belongsTo(db.User, { foreignKey: 'writer', targetKey: 'name' });
-		db.Post.hasMany(db.Comment, { foreignKey: 'postId', sourceKey: 'id' });
+		db.Board.belongsTo(db.User, { foreignKey: 'writer', targetKey: 'name' });
+		db.Board.belongsTo(db.Group, { foreignKey: 'groupId', sourceKey: 'id'});
+		db.Board.hasMany(db.Comment, { foreignKey: 'boardId', sourceKey: 'id' });
 	}
-};
+}

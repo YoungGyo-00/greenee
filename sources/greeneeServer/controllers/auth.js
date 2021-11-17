@@ -8,12 +8,16 @@ exports.join = async (req, res, next) => {
 	try {
 		const exId = await User.findOne({ where: { id } });
 		const exPwd = await User.findOne({ where: { pwd } });
+		const exName = await User.findOne({ where: { name } });
 		if (exId) {
 			console.log('이미 회원인 상태입니다');
 			return res.status(400).send('이미 회원인 상태입니다');
 		} else if (exPwd) {
 			console.log('이미 사용중인 비밀번호입니다');
 			return res.status(400).send('이미 사용중인 비밀번호입니다');
+		} else if (exName) {
+			console.log('이미 사용중인 닉네임입니다');
+			return res.status(400).send('이미 사용중인 닉네임입니다');
 		}
 		const hash = await bcrypt.hash(pwd, 12);
 		await User.create({

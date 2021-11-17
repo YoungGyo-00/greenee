@@ -9,10 +9,12 @@ const passport = require('passport');
 dotenv.config();
 const { sequelize } = require('./models');
 const passportConfig = require('./passport');
+const mainRouter = require('./routes');
 const authRouter = require('./routes/auth');
 const commentsRouter = require('./routes/comments');
 const postsRouter = require('./routes/posts');
-const { isLoggedIn, checkPostId } = require('./middlewares');
+const groupsRouter = require('./routes/groups');
+const { isLoggedIn } = require('./middlewares');
 
 const app = express();
 passportConfig();
@@ -28,7 +30,8 @@ sequelize.sync({ force: false })
 
 app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname,'public')));
-app.use('/img', express.static(path.join(__dirname, 'uploads')));
+app.use('/img', express.static(path.join(__dirname, 'Plogging')));
+app.use('/img_post', express.static(path.join(__dirname, 'Campaigns')));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser(process.env.COOKIE_SECRET));
@@ -45,9 +48,11 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use('/main', isLoggedIn, mainRouter);
 app.use('/auth', authRouter);
-app.use('/comments', isLoggedIn, checkPostId, commentsRouter);
+app.use('/comments', isLoggedIn, commentsRouter);
 app.use('/posts', isLoggedIn, postsRouter);
+app.use('/groups', isLoggedIn, groupsRouter);
 
 app.use((req,res,next) => {
 	const error = new Error(`${req.method} ${req.url} 라우터가 없습니다`);

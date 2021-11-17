@@ -20,16 +20,10 @@ exports.noPermission = (req, res) => {
 	res.status(403).send('권한이 없습니다');
 };
 
-// 실제 db에 postId가 존재하는지 (0)
-exports.checkPostId = async (req, res, next) => {
-	try{
-		const post = await Post.findOne({
-			where: { id: req.query.postId },
-		});
-		res.locals.post = post;
-		next();
-	} catch (error) {
-		console.error(error);
-		next(error);
-	}
+exports.noPost = (req, res) => {
+	res.status(403).send('캠페인이 없습니다');
+};
+
+exports.noBoard = (req, res) => {
+	res.status(403).send('게시글이 없습니다');
 };

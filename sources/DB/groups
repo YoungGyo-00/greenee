@@ -1,0 +1,10 @@
+ CREATE TABLE `groups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(30) NOT NULL,
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  `writer` varchar(10) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `writer` (`writer`),
+  CONSTRAINT `groups_ibfk_1` FOREIGN KEY (`writer`) REFERENCES `users` (`name`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8
