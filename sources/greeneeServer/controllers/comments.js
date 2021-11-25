@@ -5,7 +5,7 @@ exports.CreatePost = async (req, res, next) => {
 	try {
 		const comment = await Comment.create({
 			postId: req.query.postId,
-			commenter: req.user.name,
+			commenter: req.user.nickName,
 			comment: req.body.comment,
 		});
 		console.log("댓글 생성 완료");
@@ -20,7 +20,7 @@ exports.CreateBoard = async (req, res, next) => {
 	try {
 		const comment = await Comment.create({
 			boardId: req.query.boardId,
-			commenter: req.user.name,
+			commenter: req.user.nickName,
 			comment: req.body.comment,
 		});
 		console.log("댓글 생성 완료");

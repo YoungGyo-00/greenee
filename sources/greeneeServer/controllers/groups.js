@@ -22,7 +22,7 @@ exports.ShowGroups = async (req, res, next) => {
 exports.CreateGroup = async (req, res, next) => {
 	try {
 		const group = await Group.create({
-			writer: req.user.name,
+			writer: req.user.nickName,
 			title: req.body.title,
 		});
 		console.log("그룹 생성");
@@ -52,7 +52,7 @@ exports.ShowBoard = async (req, res, next) => {
 exports.CreateBoard = async (req, res, next) => {
 	try {
 		const board = await Board.create({
-			writer: req.user.name,
+			writer: req.user.nickName,
 			title: req.body.title,
 			content: req.body.content,
 			groupId: req.params.id

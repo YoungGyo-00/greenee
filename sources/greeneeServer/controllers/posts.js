@@ -29,7 +29,7 @@ exports.ShowCampaigns = async (req, res, next) => {
 exports.CreateCampaign = async (req, res, next) => {
 	try {
 		const post = await Post.create({
-			writer: req.user.name,
+			writer: req.user.nickName,
 			title: req.body.title,
 			content: req.body.content,
 			img: req.body.url,

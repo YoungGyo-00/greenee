@@ -5,6 +5,7 @@ const path = require('path');
 const session = require('express-session');
 const dotenv = require('dotenv');
 const passport = require('passport');
+const bodyParser = require('body-parser');
 
 dotenv.config();
 const { sequelize } = require('./models');
@@ -33,7 +34,7 @@ app.use(express.static(path.join(__dirname,'public')));
 app.use('/img', express.static(path.join(__dirname, 'Plogging')));
 app.use('/img_post', express.static(path.join(__dirname, 'Campaigns')));
 app.use(express.json());
-app.use(express.urlencoded({extended: false}));
+app.use(express.urlencoded({extended: true}));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(session({
 	resave: false,
@@ -64,7 +65,7 @@ app.use((err, req, res, next)=> {
 	res.locals.message = err.message;
 	res.locals.error = process.env.NODE_ENV !== 'production' ? err : {};
 	res.status(err.status || 500);
-	res.render('error');
+	res.send('error');
 });
 
 app.listen(app.get('port'), () => {

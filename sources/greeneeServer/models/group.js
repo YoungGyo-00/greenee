@@ -20,7 +20,7 @@ module.exports = class Group extends Sequelize.Model {
 	}
 	
 	static associate(db) {
-		db.Group.belongsTo(db.User, { foreignKey: 'writer', targetKey: 'name' });
+		db.Group.belongsTo(db.User, { foreignKey: 'writer', targetKey: 'nickName' });
 		db.Group.hasMany(db.Board, { foreignKey: 'groupId', sourceKey: 'id'});
 	}
 }
