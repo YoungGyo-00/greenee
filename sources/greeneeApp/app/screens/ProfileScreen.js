@@ -1,11 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useContext, useState } from "react";
 import { View, Text, StyleSheet, Alert, TextInput, Button } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { Picker } from '@react-native-picker/picker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import axios from "axios";
 
 import { COLOR } from "../config/styles";
+import loginContext from '../context/Context';
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -39,23 +42,44 @@ const styles = StyleSheet.create({
 const ProfileScreen = () => {
   const { control, handleSubmit, setValue, reset, formState: { errors } } = useForm();
   const [userInfo, setUserInfo] = useState({
-    name: '',
+    nickName: '',
     cellphone: '',
     age: '',
     gender: ''
   });
+  const { loginToken, setLoginToken } = useContext(loginContext);
   const [selectedValue, setSelectedValue] = useState("남");
 
   const cellphoneRegExp = /^[0-9]+$/;
 
-  const onSubmit = (data) => {
-    data['gender'] = selectedValue;
+  const onSubmit = async (data) => {
+    data['gender'] = selectedValue || "남";
     try {
-      AsyncStorage.setItem('userInfo', JSON.stringify(data)).then(() => {
-        console.log(data);
-        Alert.alert('', '저장되었습니다.');
-      });
+      let storedUserInfo = await AsyncStorage.getItem('userInfo');
+      let storedUserInfoJSON = JSON.parse(storedUserInfo);
+      storedUserInfoJSON['gender'] = data['gender'];
+      storedUserInfoJSON['age'] = data['age'];
+      console.log(storedUserInfoJSON);
+      await axios.post(
+        'http://39.117.55.147/user/update',
+        JSON.stringify(storedUserInfoJSON),
+        {
+          timeout: 3000,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      ).then(async (res) => {
+        console.log(res);
+        await AsyncStorage.setItem('userInfo', JSON.stringify(storedUserInfoJSON)).then(() => {
+          console.log(data);
+          Alert.alert('', '저장되었습니다.');
+        });
+      })
+
+
     } catch (error) {
+      console.log(error);
       Alert.alert('에러', '저장에 실패하였습니다. 다시 시도해주세요.');
     }
   }
@@ -63,9 +87,10 @@ const ProfileScreen = () => {
     const getUserInfo = async () => {
       try {
         let storedUserInfo = await AsyncStorage.getItem('userInfo');
+        console.log(storedUserInfo);
         let storedUserInfoJSON = JSON.parse(storedUserInfo);
         setUserInfo(storedUserInfoJSON);
-        setValue('name', storedUserInfoJSON.name);
+        setValue('nickName', storedUserInfoJSON.nickName);
         setValue('cellphone', storedUserInfoJSON.cellphone);
         setValue('age', storedUserInfoJSON.age);
         setSelectedValue(storedUserInfoJSON.gender);
@@ -84,8 +109,19 @@ const ProfileScreen = () => {
           <View>
             <Text style={{ fontSize: 24, marginBottom: 10 }}>프로필</Text>
           </View>
-          <View>
-            <Button title="저장" onPress={handleSubmit(onSubmit)} color={COLOR.MAIN} />
+          <View style={{ flexDirection: "row" }}>
+            <Button title="로그아웃" onPress={async() => {
+              console.log('로그아웃');
+              await AsyncStorage.removeItem("userInfo");
+              await AsyncStorage.removeItem("loginToken");
+              const loginHandler = setLoginToken(false);
+              
+            }} color={COLOR.RED} />
+
+            <Button title="저장"
+              onPress={handleSubmit(onSubmit)}
+              color={COLOR.MAIN}
+            />
           </View>
         </View>
         <View style={styles.content}>
@@ -102,18 +138,18 @@ const ProfileScreen = () => {
                     placeholder="홍길동"
                     onChangeText={value => onChange(value)}
                     value={value}
-                    defaultValue={userInfo.name}
+                    defaultValue={userInfo.nickName}
 
                   />
                 )}
-                name="name"
+                name="nickName"
                 rules={{
                   required: {
                     value: true, message: '필수 입력 항목입니다'
                   },
                 }}
               />
-              <Text style={[styles.errorMessage, styles.mb_3]}>{errors?.name?.message}</Text>
+              <Text style={[styles.errorMessage, styles.mb_3]}>{errors?.nickName?.message}</Text>
             </View>
           </View>
           <View style={styles.elem}>

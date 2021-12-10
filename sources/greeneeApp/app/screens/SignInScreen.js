@@ -1,4 +1,4 @@
-import React, { useRef, useState, useContext } from "react";
+import React, { useRef, useState, useContext, useEffect } from "react";
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, Alert } from "react-native";
 import axios from 'axios';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -50,20 +50,58 @@ const SignInScreen = ({ navigation }) => {
   const ref_pwd = useRef();
   const { loginToken, setLoginToken } = useContext(loginContext);
 
+  useEffect(() => {
+    const isToken = async () => {
+      let loginToken = await AsyncStorage.getItem('loginToken');
+      console.log('[loginToken 여부] : ', loginToken);
+      if (loginToken !== null) {
+        const loginHandler = setLoginToken(true);
+      }
+    }
+    isToken();
+  }, []);
   // 로그인버튼 눌렀을 때
   const signIn = async () => {
     try {
-      // let response = await axios.post('',userInfo);
-      let storedUserInfo = await AsyncStorage.getItem('userInfo');
-      if(storedUserInfoJSON === null ) return;
-      let storedUserInfoJSON = JSON.parse(storedUserInfo);
-      if (userInfo.id === storedUserInfoJSON.id && userInfo.pwd === storedUserInfoJSON.pwd) {
+      await axios.post(
+        'http://39.117.55.147/user/signIn',
+        JSON.stringify(userInfo),
+        {
+          timeout: 3000,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      ).then(async (res) => {
+        console.log(res.data.userInfo);
+        let rawUserInfo = res.data.userInfo;
+        let userInfo = {
+          id: rawUserInfo.id,
+          nickName: rawUserInfo.nickName,
+          cellphone: rawUserInfo.cellphone,
+          age: rawUserInfo.age
+        }
+        console.log(userInfo);
+        await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
+        await AsyncStorage.setItem('loginToken', 'true');
         const loginHandler = setLoginToken(true);
-      } else {
-        Alert.alert('에러', '아이디 혹은 비밀번호가 일치하지 않습니다.')
-      }
+      })
+      // let storedUserInfo = await AsyncStorage.getItem('userInfo');
+      // if(storedUserInfoJSON === null ) return;
+      // let storedUserInfoJSON = JSON.parse(storedUserInfo);
+      // if (userInfo.id === storedUserInfoJSON.id && userInfo.pwd === storedUserInfoJSON.pwd) {
+      //   const loginHandler = setLoginToken(true);
+      // } else {
+      //   Alert.alert('에러', '아이디 혹은 비밀번호가 일치하지 않습니다.')
+      // }
     } catch (error) {
       console.log('[signInError] : ', error);
+      if (Object.keys(error.response.data).length != 0) {
+        console.log(error.response.data.errorMessage);
+        Alert.alert('에러', error.response.data.errorMessage);
+      } else {
+        Alert.alert('서버에러', '로그인에 실패하였습니다. 다시 시도해주세요.');
+      }
     }
   }
 

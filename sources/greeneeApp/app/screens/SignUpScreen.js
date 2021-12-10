@@ -43,16 +43,56 @@ const SignUpScreen = ({ navigation }) => {
   const ref_id = useRef();
   const ref_pwd = useRef();
 
-  const onSubmit = (data) => {
+  const validate = (user) => {
+    var id = user.id;
+    var pwd = user.pwd;
+    var cellphone = user.cellphone;
+    var nickName = user.nickName;
+
+    if (id.length > 30) {
+      Alert.alert('입력오류', '아이디는 30자리 이하로 입력해주세요');
+      return true;
+    }
+    if (pwd.length > 100) {
+      Alert.alert('입력오류', '비밀번호는 100자리 이하로 입력해주세요');
+      return true;
+    }
+    if (cellphone.length > 11) {
+      Alert.alert('입력오류', '전화번호는 11자리 이하로 입력해주세요');
+      return true;
+    }
+    if (nickName.length > 10) {
+      Alert.alert('입력오류', '닉네임은 10자리 이하로 입력해주세요');
+      return true;
+    }
+
+  }
+
+  const onSubmit = async (data) => {
     console.log(data);
-    // 여기서 서버로 전송
+    if (validate(data)) return;
     try {
-      AsyncStorage.setItem('userInfo', JSON.stringify(data)).then(() => {
-        console.log(data);
+      await axios.post(
+        'http://39.117.55.147/user/signUp',
+        JSON.stringify(data),
+        {
+          timeout: 3000,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      ).then((res) => {
+        console.log(res);
         navigation.navigate('SignIn');
       });
     } catch (error) {
-      Alert.alert('에러', '회원가입에 실패하였습니다. 다시 시도해주세요.');
+      console.log('[signUpError] : ', error.message);
+      if (Object.keys(error.response.data).length != 0) {
+        console.log(error.response.data.errorMessage);
+        Alert.alert('에러', error.response.data.errorMessage);
+      } else {
+        Alert.alert('서버에러', '회원가입에 실패하였습니다. 다시 시도해주세요.');
+      }
     }
 
   }
@@ -60,7 +100,7 @@ const SignUpScreen = ({ navigation }) => {
   return (
     <KeyboardAwareScrollView>
       <View style={styles.container}>
-        <Text style={styles.mb_3}>이름</Text>
+        <Text style={styles.mb_3}>닉네임</Text>
         <Controller
           control={control}
           render={({ field: { onChange, value } }) => (
@@ -73,14 +113,14 @@ const SignUpScreen = ({ navigation }) => {
               value={value}
             />
           )}
-          name="name"
+          name="nickName"
           rules={{
             required: {
               value: true, message: '필수 입력 항목입니다'
             },
           }}
         />
-        <Text style={[styles.errorMessage, styles.mb_3]}>{errors?.name?.message}</Text>
+        <Text style={[styles.errorMessage, styles.mb_3]}>{errors?.nickName?.message}</Text>
 
         <Text style={styles.mb_3}>전화번호</Text>
         <Controller
