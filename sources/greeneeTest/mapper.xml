@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="greenee.user">
+  <select id="selectAllUsers">
+  SELECT 
+  *
+  FROM 
+    users
+  </select>
+  <select id="duplicatedUser">
+    SELECT
+    *
+    FROM 
+      users
+    <where>
+      id=#{id}
+      OR
+      nickName=#{nickName}
+      OR
+      cellphone=#{cellphone}
+    </where>
+  </select>
+  <insert id="signupUser">
+    INSERT INTO users
+    SET ?
+  </insert>
+  <select id="signinUser">
+    SELECT
+    *
+    FROM
+      users
+    <where>
+        id=#{id}
+        AND
+        pwd=#{pwd}
+      </where>
+  </select>
+
+  <update id="updateUser">
+    UPDATE users
+    <set>
+      nickName=#{id},
+      cellphone=#{cellphone},
+      <if test="age != null and age == ''">
+        age=#{age},
+      </if>
+      <if test="gender != null and gender == ''">
+        gender=#{gender},
+      </if>
+    </set>
+    <where>
+      id=#{id}
+    </where>
+  </update>
+</mapper>
