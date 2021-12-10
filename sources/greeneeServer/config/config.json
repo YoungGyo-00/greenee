@@ -3,7 +3,7 @@
     "username": "root",
     "password": "wldh1324@asa",
     "database": "greenee",
-    "host": "192.59.157.29", 
+    "host": "222.113.158.12", 
     "dialect": "mysql"
   },
   "test": {

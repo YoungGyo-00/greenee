@@ -29,7 +29,7 @@ exports.ShowCampaigns = async (req, res, next) => {
 exports.CreateCampaign = async (req, res, next) => {
 	try {
 		const post = await Post.create({
-			poster: req.user.name,
+			writer: req.user.nickName,
 			title: req.body.title,
 			content: req.body.content,
 			img: req.body.url,
@@ -121,7 +121,7 @@ exports.Search = async (req, res, next) => {
 			});
 			console.log(result);
 			return res.status(200).json(result);
-		} else if (searchType == 'poster') {
+		} else if (searchType == 'writer') {
 			const result = await Post.findAll({
 				where: {
 					poster: {

@@ -8,16 +8,16 @@ const Controller = require('../controllers/posts');
 const router = express.Router();
 
 try {
-	fs.readdirSync('uploads');
+	fs.readdirSync('Campaigns');
 } catch (error) {
-	console.error('uploads 폴더 생성');
-	fs.mkdirSync('uploads');
+	console.error('Campaigns 폴더 생성');
+	fs.mkdirSync('Campaigns');
 }
 
 const upload = multer({
 	storage: multer.diskStorage({
 		destination(req, file, cb) {
-			cb(null, 'uploads');
+			cb(null, 'Campaigns');
 		},
 		filename(req, file, cb) {
 			const ext = path.extname(file.originalname);
@@ -29,26 +29,24 @@ const upload = multer({
 const upload2 = multer();
 
 // 이미지의 저장 경로를 클라이언트로 응답
-router.post('/img', upload.single('img'), Controller.UploadImage);
+router.post('/img_post', upload.single('img'), Controller.UploadImage);
 
 // 캠페인 모두 보여주기 및 작성 (0)
 router.route('/')
   .get(Controller.ShowCampaigns)
-  .post(upload2.none(),Controller.CreateCampaign);
+  .post(upload2.none(), Controller.CreateCampaign);
 
-// 캠페인 편집 및 삭제 (0)
+router.get('/search', Controller.Search);
+
+// 캠페인 소개 편집 및 삭제 (0)
 router.route('/:id')
+  .get(Controller.Intro)
   .patch(upload2.none(), checkPermission, Controller.PatchCampaign)
   .delete(checkPermission, Controller.DeleteCampaign);
-
-// 캠페인 소개 눌렀을 떄 (0)
-router.get('/intro/:id', Controller.Intro);
 
 // 캠페인에 달린 댓글 보여주기 (0)
 router.get('/:id/comments', Controller.ShowComments);
 
-// 검색창 (0)
-router.get('/search', Controller.Search);
 
 // 팀원모집
 

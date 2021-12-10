@@ -4,26 +4,35 @@ const bcrypt = require('bcrypt');
 const User = require('../models/user');
 
 exports.join = async (req, res, next) => {
-	const {name, cellphone, id, pwd} = req.body;
+	const {nickName, cellphone, id, pwd} = req.body;
+	console.log(req.body);
+	console.log(nickName);
+	console.log(cellphone);
+	console.log(id);
+	console.log(pwd);
 	try {
 		const exId = await User.findOne({ where: { id } });
-		const exPwd = await User.findOne({ where: { pwd } });
+		const exNickName = await User.findOne({ where: { nickName } });
+		const exCellphone = await User.findOne({ where: { cellphone }});
 		if (exId) {
 			console.log('이미 회원인 상태입니다');
 			return res.status(400).send('이미 회원인 상태입니다');
-		} else if (exPwd) {
-			console.log('이미 사용중인 비밀번호입니다');
-			return res.status(400).send('이미 사용중인 비밀번호입니다');
+		} else if (exNickName) {
+			console.log('이미 사용중인 닉네임입니다');
+			return res.status(400).send('이미 사용중인 닉네임입니다');
+		} else if (exCellphone) {
+			console.log('이미 사용중인 번호입니다');
+			return res.status(400).send('이미 사용중인 번호입니다');
 		}
 		const hash = await bcrypt.hash(pwd, 12);
 		await User.create({
-			name,
+			nickName,
 			cellphone,
 			id,
 			pwd: hash,
 		});
-		console.log('회원가입 성공');s
-		return res.status(201).send('회원가입 성공');
+		console.log('회원가입 성공');
+		return res.status(201).json('회원가입 성공');
 	} catch (error) {
 		console.error(error);
 		return next(error);
@@ -45,8 +54,8 @@ exports.login = async (req, res, next) => {
 				console.error(loginError);
 				return next(loginError);
 			}
-			console.log(`${user.name}님 로그인 성공`);
-			return res.status(200).send(`${user.name}님 안녕하세요`);
+			console.log(`${user.nickName}님 로그인 성공`);
+			return res.status(200).send(`${user.nickName}님 안녕하세요`);
 		});
 	})(req, res, next);
 };

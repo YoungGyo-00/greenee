@@ -3,7 +3,7 @@ const Sequelize = require('sequelize');
 module.exports = class User extends Sequelize.Model {
 	static init(sequelize) {
 		return super.init({
-			name: {
+			nickName: {
 				type: Sequelize.STRING(10),
 				allowNull: false,
 				unique: true,
@@ -11,12 +11,10 @@ module.exports = class User extends Sequelize.Model {
 			cellphone: {
 				type: Sequelize.STRING(11),
 				allowNull: false,
-				unique: true,
 			},
 			id: {
 				type: Sequelize.STRING(30),
 				allowNull: false,
-				unique: true,
 				primaryKey: true,
 			},
 			pwd: {
@@ -41,7 +39,8 @@ module.exports = class User extends Sequelize.Model {
 	}
 	
 	static associate(db){
-		db.User.hasMany(db.Comment, { foreignKey: 'commenter', sourceKey: 'name' });
-		db.User.hasMany(db.Post, { foreignKey: 'poster', sourceKey: 'name' });
+		db.User.hasMany(db.Comment, { foreignKey: 'commenter', sourceKey: 'nickName' });
+		db.User.hasMany(db.Post, { foreignKey: 'writer', sourceKey: 'nickName' });
+		db.User.hasMany(db.Group, { foreignKey: 'writer', sourceKey: 'nickName' });
 	}
 };
