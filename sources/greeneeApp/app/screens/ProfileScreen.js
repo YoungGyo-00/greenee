@@ -57,6 +57,8 @@ const ProfileScreen = () => {
     try {
       let storedUserInfo = await AsyncStorage.getItem('userInfo');
       let storedUserInfoJSON = JSON.parse(storedUserInfo);
+      storedUserInfoJSON['nickName'] = data['nickName'];
+      storedUserInfoJSON['cellphone'] = data['cellphone'];
       storedUserInfoJSON['gender'] = data['gender'];
       storedUserInfoJSON['age'] = data['age'];
       console.log(storedUserInfoJSON);
@@ -70,9 +72,7 @@ const ProfileScreen = () => {
           }
         }
       ).then(async (res) => {
-        console.log(res);
         await AsyncStorage.setItem('userInfo', JSON.stringify(storedUserInfoJSON)).then(() => {
-          console.log(data);
           Alert.alert('', '저장되었습니다.');
         });
       })
@@ -87,8 +87,12 @@ const ProfileScreen = () => {
     const getUserInfo = async () => {
       try {
         let storedUserInfo = await AsyncStorage.getItem('userInfo');
-        console.log(storedUserInfo);
         let storedUserInfoJSON = JSON.parse(storedUserInfo);
+        // 디비에서는 number로 가져오고 parse하는 과정에서 number로 저장
+        // 근데 여기서는 string으로 변환해야됨... 그래서 안하면 오류남
+        if(storedUserInfoJSON['age'] != null && storedUserInfoJSON['age'] != ""){
+          storedUserInfoJSON['age'] = storedUserInfoJSON['age'].toString();
+        } 
         setUserInfo(storedUserInfoJSON);
         setValue('nickName', storedUserInfoJSON.nickName);
         setValue('cellphone', storedUserInfoJSON.cellphone);

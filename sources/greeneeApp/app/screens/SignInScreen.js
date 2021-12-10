@@ -79,7 +79,8 @@ const SignInScreen = ({ navigation }) => {
           id: rawUserInfo.id,
           nickName: rawUserInfo.nickName,
           cellphone: rawUserInfo.cellphone,
-          age: rawUserInfo.age
+          age: rawUserInfo.age,
+          gender: rawUserInfo.gender
         }
         console.log(userInfo);
         await AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
