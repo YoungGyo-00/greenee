@@ -6,3 +6,11 @@ sources/greeneeApp/yarn.lock
 sources/greeneeApp/android/app/src/main/assets/
 
 sources/greeneeApp/android/app/src/main/res/
+
+sources/greeneeTest/node_modules/
+
+sources/greeneeServer/package-lock.json
+
+sources/greeneeTest/package-lock.json
+
+artifacts/docs_engineering/00_자료/공모전 영상 제작/
