@@ -148,7 +148,7 @@ router.route('/update').post((req, res) => {
       id: req.body.id,
       nickName: req.body.nickName,
       cellphone: req.body.cellphone,
-      age: req.body.age,
+      age: req.body.age||null,
       gender: req.body.gender||null
     };
 

@@ -39,14 +39,10 @@
   <update id="updateUser">
     UPDATE users
     <set>
-      nickName=#{id},
+      nickName=#{nickName},
       cellphone=#{cellphone},
-      <if test="age != null and age == ''">
-        age=#{age},
-      </if>
-      <if test="gender != null and gender == ''">
-        gender=#{gender},
-      </if>
+      age=#{age},
+      gender=#{gender}
     </set>
     <where>
       id=#{id}
