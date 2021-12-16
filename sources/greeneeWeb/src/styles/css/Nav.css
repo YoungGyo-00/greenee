@@ -1,0 +1,17 @@
+.form-group {
+  display: flex;
+}
+
+label {
+  align-items: center;
+}
+
+.form-control {
+  width: 40%;
+  height: 3rem;
+}
+
+.btn-default {
+  border: 1px solid black;
+  border-spacing: 10px;
+}
