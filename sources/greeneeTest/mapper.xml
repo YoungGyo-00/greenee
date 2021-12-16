@@ -48,4 +48,14 @@
       id=#{id}
     </where>
   </update>
+  <insert id="insertMeta">
+    INSERT INTO meta
+    SET ?
+  </insert>
+  <select id="getAllData">
+    SELECT
+    *
+    FROM
+      meta
+  </select>
 </mapper>
