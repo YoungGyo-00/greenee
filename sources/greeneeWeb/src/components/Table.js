@@ -41,20 +41,49 @@ const { kakao } = window;
   },
 ]; */
 
-const Table = () => {
+const Table = (props) => {
   const [data, setData] = useState([]);
   const [flag, setFlag] = useState(false);
   const [result, setResult] = useState('');
 
   useEffect(() => {
     const fetchEvents = (async () => {
-      const res = await axios.get("http://39.117.55.147/user/getAllData");
-      for (let i=0; i<res.data.length; i++) {
-        await getAddr(res.data[i].latitude, res.data[i].longitude);
+      setData([]);
+      const data = await axios.get("http://39.117.55.147/user/getAllData");
+      if ('' === props.startDate){
+        const res = data;
+        for (let i=0; i<res.data.length; i++) {
+          await getAddr(res.data[i].latitude, res.data[i].longitude);
+        };
+      } else {
+        const res = data.data.reduce((acc,cur) => {
+          const date = new Date(cur.timeStamp);
+          const year = date.getFullYear();
+          const month = date.getMonth()+1;
+          const day = date.getDay();
+
+          const s_year = props.startDate.substring(0,4);
+          const s_month = props.startDate.substring(5,7);
+          const s_day = props.startDate.substring(8,10);
+
+          const e_year = props.endDate.substring(0,4);
+          const e_month = props.endDate.substring(5,7);
+          const e_day = props.endDate.substring(8,10);
+          
+          if (s_year <= year && year <= e_year && s_month <= month && month <= e_month && s_day <= day && day <= e_day){
+            acc.push(cur);
+            return acc;
+          };
+          return acc;
+        }, []);
+        
+        for (let i=0; i<res.length; i++) {
+          await getAddr(res[i].latitude, res[i].longitude);
+        };
       };
-    })
+    });
     fetchEvents();
-  }, []);
+  }, [props]);
 
   useEffect(() => {
     if (!(result === '')){

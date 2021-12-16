@@ -49,18 +49,50 @@ import {
   },
 ]; */
 
-const Chart = () => {
+const Chart = (props) => {
   const [data, setData] = useState([]);
   const [flag, setFlag] = useState(false);
   useEffect(() => {
     const fetchEvents = async () => {
-      const res = await axios.get("http://39.117.55.147/user/getAllData");
-      makeData(res.data);
-    };
+      const data = await axios.get("http://39.117.55.147/user/getAllData");
+      if ('' === props.startDate) {
+        const res = data;
+        makeData(res.data);
+      }
+      else{
+        const res = data.data.reduce((acc,cur) => {
+          const date = new Date(cur.timeStamp);
+          const year = date.getFullYear();
+          const month = date.getMonth()+1;
+          const day = date.getDay();
+
+          const s_year = props.startDate.substring(0,4);
+          const s_month = props.startDate.substring(5,7);
+          const s_day = props.startDate.substring(8,10);
+
+          const e_year = props.endDate.substring(0,4);
+          const e_month = props.endDate.substring(5,7);
+          const e_day = props.endDate.substring(8,10);
+          
+          if (s_year <= year && year <= e_year && s_month <= month && month <= e_month && s_day <= day && day <= e_day){
+            acc.push(cur);
+            return acc;
+          };
+          return acc;
+        }, []);
+        
+        if (res.length === 0) {
+          setData([]);
+        }
+        else {
+          makeData(res);
+        };
+      };
+    };;
 
     const makeData = async (items) => {
       const date = new Date(items[0].timeStamp);
-      const first_time = date.getFullYear() + '년' + date.getMonth() + '월';
+      const first_time = date.getFullYear() + '년' + (date.getMonth()+1) + '월';
       const arr = [{
         time: first_time,
         count: 1
@@ -68,7 +100,7 @@ const Chart = () => {
 
       for (let i=1; i<items.length; i++){
         let date = new Date(items[i].timeStamp);
-        const time = date.getFullYear() + '년' + date.getMonth() + '월';
+        const time = date.getFullYear() + '년' + (date.getMonth()+1) + '월';
         for (let j=0; j<i; j++) {
           if (time === arr[j].time) {
             arr[j].count += 1;
@@ -90,7 +122,7 @@ const Chart = () => {
 
     fetchEvents();
     setFlag(true);
-  }, []);
+  }, [props]);
 
   return (
     <ResponsiveContainer width="100%" height="45%">

@@ -1,13 +1,45 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import "../styles/css/Nav.css";
 
-const Navs = () => {
+const Navs = (props) => {
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+  useEffect(() => {
+    const curr = new Date();
+    const date = curr.toISOString().substr(0,10);
+    setStartDate(date);
+    setEndDate(date);
+  }, [])
+  
+  useEffect(() => {
+    console.log(startDate);
+    console.log(endDate);
+  }, [startDate, endDate])
+  
+  const onClick = () => {
+    props.onCreate(startDate, endDate);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    props.onCreate(startDate, endDate);
+  }
+
   return (
-    <div className="form-group">
-      <input type="date" className="form-control" placeholder="20년 10월" />
+    <div onSubmit={handleSubmit} className="form-group">
+      <input className="form-control" 
+        type="date"
+        value={startDate}
+        onChange={date => setStartDate(date.target.value)}/>
       <label>~</label>
-      <input type="date" className="form-control" placeholder="21년 11월" />
-      <button type="submit" className="btn-default">검색</button>
+      <input className="form-control" 
+        type="date" 
+        value={endDate}
+        onChange={date => setEndDate(date.target.value)} />
+      <button className="btn-default"
+        type="submit"
+        onClick={onClick}
+      >검색</button>
     </div>
   );
 };

@@ -13,7 +13,14 @@ const { kakao } = window;
   },
   {
     latitude: "36.6029863",
-    longitude: "128.5389114",
+    longitude: "126.5489114",
+    img: "https://cfile181.uf.daum.net/image/250649365602043421936D",
+    time: "20211213042346",
+    id: "이영교",
+  },
+  {
+    latitude: "36.6029863",
+    longitude: "126.4389114",
     img: "https://cfile181.uf.daum.net/image/250649365602043421936D",
     time: "20201112042346",
     id: "최동준",
@@ -39,15 +46,43 @@ const { kakao } = window;
     time: "20201112042346",
     id: "지상은",
   },
-]; */
-
-const Map = () => {
-  // const [data, setData] = useState([]);
+]; */ 
+ 
+const Map = (props) => {
   useEffect(() => {
-    
-    const fetchEvents = async () => {
-      const res = await axios.get("http://39.117.55.147/user/getAllData");
-      makeData(res.data);
+    const fetchEvents = async (callback) => {
+      const data = await axios.get("http://39.117.55.147/user/getAllData");
+      if ('' === props.startDate) {
+        const res = data;
+        makeData(res.data);
+        callback();
+      }
+      else{
+        const res = data.data.reduce((acc,cur) => {
+          const date = new Date(cur.timeStamp);
+          const year = date.getFullYear();
+          const month = date.getMonth()+1;
+          const day = date.getDay();
+
+          const s_year = props.startDate.substring(0,4);
+          const s_month = props.startDate.substring(5,7);
+          const s_day = props.startDate.substring(8,10);
+
+          const e_year = props.endDate.substring(0,4);
+          const e_month = props.endDate.substring(5,7);
+          const e_day = props.endDate.substring(8,10);
+          
+          if (s_year <= year && year <= e_year && s_month <= month && month <= e_month && s_day <= day && day <= e_day){
+            acc.push(cur);
+            return acc;
+          };
+          return acc;
+        }, []);
+        console.log(res);
+
+        makeData(res);
+        callback();
+      }
     };
 
     const makeData = (items) => {
@@ -61,13 +96,9 @@ const Map = () => {
         const hour = date.getHours();
         const min = date.getMinutes();
         const second = date.getSeconds();
-        console.log(cur.path.split(''));
-        console.log(cur.path.split('\\')[1], cur.path.split('\\')[2]);
-        
         const time = 
           year + "년 " + month + "월 " + day + "일 " + hour + "시 " + min + "분 " + second + "초";
         const img = 'http://39.117.55.147/static/' + cur.path.split('\\')[2]
-        console.log(img);
         const username = cur.id;
         acc.push([
           latitude,
@@ -101,8 +132,8 @@ const Map = () => {
 
     const container = document.getElementById("Map");
     const options = {
-      center: new kakao.maps.LatLng(33.450701, 126.570667),
-      level: 3,
+      center: new kakao.maps.LatLng(37.5524017, 126.902578),
+      level: 9,
     };
     const map = new kakao.maps.Map(container, options);
 
@@ -112,8 +143,7 @@ const Map = () => {
       minLevel: 5,
     });
 
-    const imageSrc =
-      "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png";
+    const imageSrc = "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png";
     const imageSize = new kakao.maps.Size(24, 35);
     const imageOption = { offset: new kakao.maps.Point(27, 69) };
 
@@ -171,7 +201,7 @@ const Map = () => {
         const marker = new kakao.maps.Marker({
           position: markerPosition,
         });
-  
+        
         marker.setMap(map);
         const iwContent = data[i][2];
         const iwPosition = markerPosition;
@@ -194,9 +224,12 @@ const Map = () => {
       }
     }
     
-    fetchEvents();
-    clusterer.addMarkers(markers);
-  }, []);
+    const callback = () => {
+      clusterer.addMarkers(markers);
+    }
+
+    fetchEvents(callback);
+  }, [props]);
 
   return (
     <div id="Map" style={{
