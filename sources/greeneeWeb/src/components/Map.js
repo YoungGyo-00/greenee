@@ -62,8 +62,8 @@ const Map = (props) => {
           const date = new Date(cur.timeStamp);
           const year = date.getFullYear();
           const month = date.getMonth()+1;
-          const day = date.getDay();
-
+          const day = date.getDate();
+          
           const s_year = props.startDate.substring(0,4);
           const s_month = props.startDate.substring(5,7);
           const s_day = props.startDate.substring(8,10);
@@ -92,7 +92,8 @@ const Map = (props) => {
         const date = new Date(cur.timeStamp);
         const year = date.getFullYear();
         const month = date.getMonth() + 1;
-        const day = date.getDay();
+        const day = date.getDate();
+        console.log(day);
         const hour = date.getHours();
         const min = date.getMinutes();
         const second = date.getSeconds();
