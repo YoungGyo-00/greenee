@@ -183,6 +183,7 @@ const weatherOptions = {
 };
 
 let images = [];
+let userInfo = {};
 // let trashCans = [];
 
 const NoticePanel = () => {
@@ -209,8 +210,8 @@ const SettingPanel = ({ location, mapRegion, isPlaying, trashCans, setTrashCans 
       let tmp = trashCans;
       tmp.push({ latitude: mapRegion.latitude, longitude: mapRegion.longitude });
       setTrashCans(tmp);
-    } else{
-      Alert.alert('오류','시작 이후 쓰레기통의 위치를 수정하거나 생성, 제거할 수 있습니다!');
+    } else {
+      Alert.alert('오류', '시작 이후 쓰레기통의 위치를 수정하거나 생성, 제거할 수 있습니다!');
     }
   }
 
@@ -300,11 +301,14 @@ const InstrumentPanel = ({ elapsedTime, speed, distance }) => {
 
 const sendToServer = async (obj, latitude, longitude) => {
   images.push({
+    files: obj.uri,
     src: obj.base64,
     latitude: latitude,
-    longitude: longitude
+    longitude: longitude,
+    name: obj.fileName,
+    type: obj.type,
+    timeStamp: new Date(new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000 + 9 * 60 * 60 * 1000).toString()
   });
-  console.log(images.length);
 }
 
 const CameraButton = ({ latitude, longitude }) => {
@@ -376,7 +380,7 @@ const HomeScreen = () => {
   }, [isPlaying, elapsedTime]);
 
   useEffect(() => {
-    let today = new Date(new Date().getTime() + new Date().getTimezoneOffset()*60*1000 +9 * 60 * 60 * 1000);
+    let today = new Date(new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000 + 9 * 60 * 60 * 1000);
     const getTrashCan = async () => {
       let tmp = ""
       try {
@@ -390,8 +394,16 @@ const HomeScreen = () => {
       }
     }
     getTrashCan();
-  }, []);
+  }, []); 
 
+  useEffect(()=>{
+    const getUserInfo = async() => {
+      let userInfoString = await AsyncStorage.getItem("userInfo");
+      userInfo = JSON.parse(userInfoString);
+      console.log(userInfo);
+    };
+    getUserInfo();
+  }, [])
   const geolocationCallback = (obj) => {
     distanceTmp = distanceTmp + obj.distance;
     setLocation({ ...obj, distance: distanceTmp });
@@ -428,7 +440,7 @@ const HomeScreen = () => {
                 path: path,
                 images: images
               };
-              let today = new Date(new Date().getTime() + new Date().getTimezoneOffset()*60*1000 +9 * 60 * 60 * 1000);
+              let today = new Date(new Date().getTime() + new Date().getTimezoneOffset() * 60 * 1000 + 9 * 60 * 60 * 1000);
               let year = today.getFullYear();
               let month = today.getMonth() + 1 > 9 ? today.getMonth() + 1 : '0' + (today.getMonth() + 1);
               let date = today.getDate() > 9 ? today.getDate() : '0' + today.getDate();
@@ -437,7 +449,47 @@ const HomeScreen = () => {
               let seconds = today.getSeconds() > 9 ? today.getSeconds() : '0' + today.getSeconds();
 
               let keyString = 'record' + year + month + date + hours + minutes + seconds;
-              console.log(info, keyString);
+              
+              // images는 사용자가 찍은 사진의 메타 데이터를 저장해 놓은 배열이다. 
+              // files: 실제 이미지
+              // src: 이미지 base64 인코딩
+              // latitude: latitude
+              // longitude: longitude
+              // name: 파일명
+              // type: 파일 타입
+              // timeStamp: 시간
+
+              if (images.length !== 0) {
+                console.log("images 배열에 사진이 존재합니다!");
+                const formData = new FormData();
+
+                for (let i = 0; i < images.length; i++) {
+                  console.log(userInfo.id);
+                  formData.append("image", {
+                    name: images[i].name,
+                    type: images[i].type,
+                    uri : images[i].files
+                  });
+                  formData.append("latitude",images[i].latitude);
+                  formData.append("longitude",images[i].longitude);
+                  formData.append("timeStamp", images[i].timeStamp);
+                  formData.append("id", userInfo.id);
+                }
+                console.log("formData : ", formData);
+                await axios.post(
+                  'http://39.117.55.147/user/upload',
+                  formData,
+                  {
+                    timeout: 5000,
+                    headers: {
+                      'Content-Type': 'multipart/form-data'
+                    }
+                  }
+                ).then((res) => {
+                  console.log(res);
+                });
+
+              }
               await AsyncStorage.setItem(keyString, JSON.stringify(info));
               await AsyncStorage.setItem('trashCans', JSON.stringify(trashCans));
               Alert.alert('성공', '플로깅 기록이 저장되었습니다. 기록 탭에서 확인해보세요!');
@@ -521,7 +573,7 @@ const HomeScreen = () => {
       </MapView>
       <InstrumentPanel elapsedTime={elapsedTime} speed={location.speed} distance={location.distance} />
       {isPlaying ? <><StopButton /><CameraButton latitude={location.latitude} longitude={location.longitude} /></> : <StartButton />}
-      <SettingPanel location={location} mapRegion={mapRegion} isPlaying={isPlaying} trashCans={trashCans} setTrashCans={setTrashCans}  />
+      <SettingPanel location={location} mapRegion={mapRegion} isPlaying={isPlaying} trashCans={trashCans} setTrashCans={setTrashCans} />
       <NoticePanel />
     </View>
 
