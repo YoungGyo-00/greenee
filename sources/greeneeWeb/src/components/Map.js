@@ -50,12 +50,14 @@ const { kakao } = window;
  
 const Map = (props) => {
   useEffect(() => {
-    const fetchEvents = async (callback) => {
+    const fetchEvents = async (callback3) => {
+      const callback6 = () => {
+        callback3();
+      };
       const data = await axios.get("http://39.117.55.147/user/getAllData");
       if ('' === props.startDate) {
         const res = data;
-        makeData(res.data);
-        callback();
+        makeData(res.data, callback6);
       }
       else{
         const res = data.data.reduce((acc,cur) => {
@@ -78,14 +80,12 @@ const Map = (props) => {
           };
           return acc;
         }, []);
-        console.log(res);
-
-        makeData(res);
-        callback();
+        makeData(res, callback6);
       }
     };
 
-    const makeData = (items) => {
+    const makeData = (items, callback6) => {
+      console.log('2');
       const arr = items.reduce((acc, cur) => {
         const latitude = cur.latitude;
         const longitude = cur.longitude;
@@ -93,7 +93,6 @@ const Map = (props) => {
         const year = date.getFullYear();
         const month = date.getMonth() + 1;
         const day = date.getDate();
-        console.log(day);
         const hour = date.getHours();
         const min = date.getMinutes();
         const second = date.getSeconds();
@@ -101,34 +100,54 @@ const Map = (props) => {
           year + "년 " + month + "월 " + day + "일 " + hour + "시 " + min + "분 " + second + "초";
         const img = 'http://39.117.55.147/static/' + cur.path.split('\\')[2]
         const username = cur.id;
-        acc.push([
-          latitude,
-          longitude,
-          '<div class="wrap">' +
-          '    <div class="info">' +
-          '        <div class="title">' + 
-                    username +
-          "        </div>" +
-          '        <div class="body">' +
-          '            <div class="img">' +
-          "                <img src=" + img + ' width="73" height="70">' +
-          "           </div>" +
-          '            <div class="desc">' +
-          '                <div class="ellipsis">' +
-                            '위치 : (' + latitude + ', ' + longitude + ')' +
-          "                </div> " +
-          '                <div class="jibun ellipsis">' +
-                            time +
-          "                </div> " +
-          "            </div>" +
-          "        </div>" +
-          "    </div>" +
-          "</div>",
-        ]);
+
+        const geocoder = new kakao.maps.services.Geocoder();
+        const coord = new kakao.maps.LatLng(latitude, longitude);
+
+        const callback = (result, status) => {
+          if (status === kakao.maps.services.Status.OK) {
+            const place = result[0].address.address_name;
+            console.log('3');
+            callback2(place);
+          };
+        };
+        geocoder.coord2Address(coord.getLng(), coord.getLat(), callback);
+        const callback2 = (place) => {
+          acc.push([
+            latitude,
+            longitude,
+            '<div class="wrap">' +
+            '    <div class="info">' +
+            '        <div class="title">' + 
+                      username +
+            "        </div>" +
+            '        <div class="body">' +
+            '            <div class="img">' +
+            "                <img src=" + img + ' width="73" height="70">' +
+            "           </div>" +
+            '            <div class="desc">' +
+            '                <div class="ellipsis">' +
+                              place +
+            "                </div> " +
+            '                <div class="jibun ellipsis">' +
+                              time +
+            "                </div> " +
+            "            </div>" +
+            "        </div>" +
+            "    </div>" +
+            "</div>",
+          ]);
+          if (acc.length === items.length){
+            console.log('4');
+            callback4();
+          }
+        };
         return acc;
       }, []);
-      
-      first(arr);
+      const callback4 = () => {
+        first(arr);
+        callback6();
+      }
     };
 
     const container = document.getElementById("Map");
@@ -196,6 +215,7 @@ const Map = (props) => {
     const markers = [];
 
     const first = (data) => {
+      console.log('5');
       for (let i = 0; i < data.length; i++) {
         const markerPosition = new kakao.maps.LatLng(data[i][0], data[i][1]);
         
@@ -225,11 +245,11 @@ const Map = (props) => {
       }
     }
     
-    const callback = () => {
+    const callback3 = () => {
       clusterer.addMarkers(markers);
     }
 
-    fetchEvents(callback);
+    fetchEvents(callback3);
   }, [props]);
 
   return (
